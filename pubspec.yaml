@@ -2,7 +2,7 @@ name: kupi
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -28,12 +28,98 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  # Core Flutter SDK used to build the application UI and logic.
   flutter:
+    sdk: flutter
+  # Official Flutter localization support for Material, Cupertino and Widgets.
+  flutter_localizations:
+    sdk: flutter
+  flutter_web_plugins:
     sdk: flutter
 
   # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+
+  # Opens external URLs, emails, phone numbers, and apps from Flutter.
+  url_launcher: ^6.3.2
+
+  # Enables in-app purchases and subscriptions on Android and iOS.
+  in_app_purchase: ^3.2.3
+
+  # Simplifies internationalization (i18n), translations, and locale switching.
+  easy_localization: ^3.0.8
+
+  # Retrieves app metadata such as version, build number, and package name.
+  package_info_plus: ^9.0.0
+
+  #
+  device_info_plus: ^12.3.0
+
+  # Icon pack based on Tabler Icons.
+  flutter_tabler_icons: ^1.43.0
+
+  # State management solution with compile-time safety and scalability.
+  flutter_riverpod: ^2.4.0
+
+  # Loads environment variables from a .env file.
+  flutter_dotenv: ^5.1.0
+
+  # Renders SVG files inside Flutter widgets.
+  flutter_svg: ^2.2.0
+
+  # Displays customizable rating bars (stars, icons, etc.).
+  flutter_rating_bar: ^4.0.1
+
+  # Stores small key-value data locally on the device.
+  shared_preferences: ^2.5.3
+
+  # Opens native device settings screens (Wi-Fi, notifications, app settings).
+  app_settings: ^6.1.1
+
+  # Manages runtime permissions on Android and iOS.
+  permission_handler: ^12.0.1
+
+  # Initializes and configures Firebase services.
+  firebase_core: ^4.1.1
+
+  # Handles push notifications via Firebase Cloud Messaging (FCM).
+  firebase_messaging: ^16.0.2
+
+  # NoSQL cloud database with real-time sync from Firebase.
+  cloud_firestore: ^6.0.2
+
+  # Flutter client for Supabase (authentication, database, storage).
+  supabase_flutter: ^2.9.1
+
+  # Icon pack based on Lucide Icons.
+  lucide_icons: ^0.257.0
+
+  #
+  material_symbols_icons: ^4.2892.0
+
+  # Debounces function calls to prevent excessive executions.
+  easy_debounce: ^2.0.3
+
+  # Declarative routing and navigation for Flutter apps.
+  go_router: ^16.0.0
+
+  # Converts DateTime values into relative time strings (e.g., "5 minutes ago").
+  timeago: ^3.7.1
+
+  # Generates unique identifiers (UUIDs).
+  uuid: ^4.5.1
+
+  # Internationalization utilities for dates, numbers, and text formatting.
+  intl: ^0.20.2
+
+  # Creates shimmer loading placeholders for better UX.
+  shimmer: ^3.0.0
+
+  #
+  web: ^1.1.1
+
+  #
+  quick_actions: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -51,7 +137,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
