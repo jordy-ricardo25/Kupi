@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:kupi/core/exceptions/index.dart';
+import 'package:kupi/core/utils/index.dart';
 import 'package:kupi/features/auth/index.dart';
 import 'package:kupi/features/user/index.dart';
 
@@ -16,9 +17,9 @@ final class SignUpController {
     required String password,
   }) async {
     final notifier = _ref.read(signUpMutationProvider.notifier);
-    final normalizedName = name.trim();
-    final normalizedEmail = email.trim().toLowerCase();
-    final normalizedPassword = password.trim();
+    final normalizedName = AuthValidators.normalizeName(name);
+    final normalizedEmail = AuthValidators.normalizeEmail(email);
+    final normalizedPassword = AuthValidators.normalizePassword(password);
 
     notifier.state = notifier.state.copyWith(
       isLoading: true,
@@ -27,31 +28,21 @@ final class SignUpController {
     );
 
     try {
-      if (normalizedName.isEmpty) {
-        throw AuthException('Ingresa tu nombre completo.');
-      }
+      final nameError = AuthValidators.validateFullName(normalizedName);
+      if (nameError != null) throw AuthException(nameError);
 
-      if (normalizedName.length < 3) {
-        throw AuthException('Tu nombre debe tener al menos 3 caracteres.');
-      }
+      final emailError = AuthValidators.validateEmail(
+        normalizedEmail,
+        emptyMessage: 'Ingresa un correo electrónico válido.',
+        invalidMessage: 'Ingresa un correo electrónico válido.',
+      );
+      if (emailError != null) throw AuthException(emailError);
 
-      if (normalizedEmail.isEmpty) {
-        throw AuthException('Ingresa un correo electrónico válido.');
-      }
-
-      final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-      if (!emailRegex.hasMatch(normalizedEmail)) {
-        throw AuthException('Ingresa un correo electrónico válido.');
-      }
-
-      if (normalizedPassword.isEmpty) {
-        throw AuthException('Ingresa una contraseña válida.');
-      }
-
-      final passwordRegex = RegExp(r'^\d{6}$');
-      if (!passwordRegex.hasMatch(normalizedPassword)) {
-        throw AuthException('La contraseña debe tener exactamente 6 dígitos.');
-      }
+      final passwordError = AuthValidators.validateSixDigitsPassword(
+        normalizedPassword,
+        emptyMessage: 'Ingresa una contraseña válida.',
+      );
+      if (passwordError != null) throw AuthException(passwordError);
 
       final user = await _ref
           .read(authRepositoryProvider)

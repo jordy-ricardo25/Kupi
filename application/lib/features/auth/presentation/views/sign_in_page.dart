@@ -33,10 +33,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
   void _normalizeEmailInput() {
     final raw = emailController.text;
-    final normalized = raw
-        .toLowerCase()
-        .replaceAll(' ', '')
-        .replaceAll(RegExp(r'[^a-z0-9@._+\-]'), '');
+    final normalized = AuthValidators.normalizeEmailInput(raw);
 
     if (raw == normalized) return;
 
@@ -48,11 +45,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
   void _normalizePasswordInput() {
     final raw = passwordController.text;
-    var normalized = raw.replaceAll(RegExp(r'[^0-9]'), '');
-
-    if (normalized.length > 6) {
-      normalized = normalized.substring(0, 6);
-    }
+    final normalized = AuthValidators.normalizePasswordInput(raw);
 
     if (raw == normalized) return;
 
@@ -84,25 +77,11 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   }
 
   String? _validateEmail(String? value) {
-    final email = value?.trim() ?? '';
-    if (email.isEmpty) return 'Ingresa tu correo electrónico.';
-
-    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-    if (!emailRegex.hasMatch(email)) {
-      return 'Ingresa un correo válido.';
-    }
-
-    return null;
+    return AuthValidators.validateEmail(value);
   }
 
   String? _validatePassword(String? value) {
-    final password = value?.trim() ?? '';
-    if (password.isEmpty) return 'Ingresa tu contraseña.';
-    if (!RegExp(r'^\d{6}$').hasMatch(password)) {
-      return 'La contraseña debe tener exactamente 6 dígitos.';
-    }
-
-    return null;
+    return AuthValidators.validateSixDigitsPassword(value);
   }
 
   Widget _buildOrb({
@@ -364,11 +343,10 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                               label: 'Continuar con Google',
                               onPressed: mutation.isLoading
                                   ? null
-                                  : () {
-                                      showSnackbar(
-                                        context,
-                                        'Google login estará disponible pronto.',
-                                      );
+                                  : () async {
+                                      await ref
+                                          .read(signInControllerProvider)
+                                          .signInWithGoogle();
                                     },
                               icon: Container(
                                 width: 24,
@@ -392,11 +370,10 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                               label: 'Continuar con Apple',
                               onPressed: mutation.isLoading
                                   ? null
-                                  : () {
-                                      showSnackbar(
-                                        context,
-                                        'Apple login estará disponible pronto.',
-                                      );
+                                  : () async {
+                                      await ref
+                                          .read(signInControllerProvider)
+                                          .signInWithApple();
                                     },
                               icon: const Icon(Icons.apple, size: 20),
                             ),

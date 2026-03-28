@@ -14,7 +14,7 @@ final class SupabaseAuthRepository implements AuthRepository {
   const SupabaseAuthRepository(this._client);
 
   @override
-  Future<Result<AuthUser>> signIn({
+  Future<Result<AuthUser>> signInWithEmail({
     required String email,
     required String password,
   }) async {
@@ -38,6 +38,22 @@ final class SupabaseAuthRepository implements AuthRepository {
         ),
       );
     }
+  }
+
+  @override
+  Future<Result<bool>> signInWithGoogle() {
+    return _signInWithOAuth(
+      provider: OAuthProvider.google,
+      fallbackError: 'No se pudo iniciar sesión con Google.',
+    );
+  }
+
+  @override
+  Future<Result<bool>> signInWithApple() {
+    return _signInWithOAuth(
+      provider: OAuthProvider.apple,
+      fallbackError: 'No se pudo iniciar sesión con Apple.',
+    );
   }
 
   @override
@@ -116,6 +132,22 @@ final class SupabaseAuthRepository implements AuthRepository {
   AuthUser? _mapUser(User? user) {
     if (user == null) return null;
     return AuthUserModel(user.id, email: user.email!);
+  }
+
+  Future<Result<bool>> _signInWithOAuth({
+    required OAuthProvider provider,
+    required String fallbackError,
+  }) async {
+    try {
+      final opened = await _client.auth.signInWithOAuth(
+        provider,
+        redirectTo: _signInRedirect,
+      );
+
+      return Result.success(opened);
+    } catch (e) {
+      return Result.failure(_extractError(e, fallback: fallbackError));
+    }
   }
 
   String _extractError(Object error, {required String fallback}) {

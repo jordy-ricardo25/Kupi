@@ -34,10 +34,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
 
   void _normalizeEmailInput() {
     final raw = emailController.text;
-    final normalized = raw
-        .toLowerCase()
-        .replaceAll(' ', '')
-        .replaceAll(RegExp(r'[^a-z0-9@._+\-]'), '');
+    final normalized = AuthValidators.normalizeEmailInput(raw);
 
     if (raw == normalized) return;
 
@@ -49,11 +46,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
 
   void _normalizePasswordInput() {
     final raw = passwordController.text;
-    var normalized = raw.replaceAll(RegExp(r'[^0-9]'), '');
-
-    if (normalized.length > 6) {
-      normalized = normalized.substring(0, 6);
-    }
+    final normalized = AuthValidators.normalizePasswordInput(raw);
 
     if (raw == normalized) return;
 
@@ -87,33 +80,15 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   }
 
   String? _validateName(String? value) {
-    final name = value?.trim() ?? '';
-    if (name.isEmpty) return 'Ingresa tu nombre completo.';
-    if (name.length < 3) return 'Tu nombre debe tener al menos 3 caracteres.';
-
-    return null;
+    return AuthValidators.validateFullName(value);
   }
 
   String? _validateEmail(String? value) {
-    final email = value?.trim() ?? '';
-    if (email.isEmpty) return 'Ingresa tu correo electrónico.';
-
-    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-    if (!emailRegex.hasMatch(email)) {
-      return 'Ingresa un correo válido.';
-    }
-
-    return null;
+    return AuthValidators.validateEmail(value);
   }
 
   String? _validatePassword(String? value) {
-    final password = value?.trim() ?? '';
-    if (password.isEmpty) return 'Ingresa tu contraseña.';
-    if (!RegExp(r'^\d{6}$').hasMatch(password)) {
-      return 'La contraseña debe tener exactamente 6 dígitos.';
-    }
-
-    return null;
+    return AuthValidators.validateSixDigitsPassword(value);
   }
 
   Widget _buildOrb({
@@ -129,32 +104,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: RadialGradient(colors: colors, stops: const [0.0, 1.0]),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSocialButton({
-    required String label,
-    required Widget icon,
-    required VoidCallback? onPressed,
-  }) {
-    return SizedBox(
-      height: 52,
-      child: OutlinedButton.icon(
-        onPressed: onPressed,
-        icon: icon,
-        label: Text(
-          label,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-        ),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF212126),
-          backgroundColor: Colors.white,
-          side: const BorderSide(color: Color(0xFFE7E3F1)),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
         ),
       ),
     );
@@ -372,57 +321,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                               ),
                             ),
                             const SizedBox(height: 20),
-                            Text(
-                              'O continúa con tu cuenta social',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: const Color(0xFF8A8996),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 14),
-                            _buildSocialButton(
-                              label: 'Registrarme con Google',
-                              onPressed: mutation.isLoading
-                                  ? null
-                                  : () {
-                                      showSnackbar(
-                                        context,
-                                        'Google login estará disponible pronto.',
-                                      );
-                                    },
-                              icon: Container(
-                                width: 24,
-                                height: 24,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Color(0xFFF3F5FF),
-                                ),
-                                alignment: Alignment.center,
-                                child: const Text(
-                                  'G',
-                                  style: TextStyle(
-                                    color: Color(0xFF2C67F2),
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            _buildSocialButton(
-                              label: 'Registrarme con Apple',
-                              onPressed: mutation.isLoading
-                                  ? null
-                                  : () {
-                                      showSnackbar(
-                                        context,
-                                        'Apple login estará disponible pronto.',
-                                      );
-                                    },
-                              icon: const Icon(Icons.apple, size: 20),
-                            ),
-                            const SizedBox(height: 14),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
