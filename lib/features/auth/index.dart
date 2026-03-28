@@ -29,8 +29,8 @@ export 'presentation/providers/notifier_provider.dart';
 export 'presentation/providers/repository_provider.dart';
 
 // export 'presentation/views/reset_password_page.dart';
-// export 'presentation/views/sign_in_page.dart';
-// export 'presentation/views/sign_up_page.dart';
+export 'presentation/views/sign_in_page.dart';
+export 'presentation/views/sign_up_page.dart';
 // export 'presentation/views/update_password_page.dart';
 
 export 'presentation/widgets/auth_card.dart';
