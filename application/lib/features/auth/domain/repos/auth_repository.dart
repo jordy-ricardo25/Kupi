@@ -7,10 +7,14 @@ import 'package:kupi/features/auth/index.dart';
 @immutable
 abstract class AuthRepository {
   /// Signs in with [email] and [password].
-  Future<Result<AuthUser>> signIn({
+  Future<Result<AuthUser>> signInWithEmail({
     required String email,
     required String password,
   });
+
+  Future<Result<bool>> signInWithGoogle();
+
+  Future<Result<bool>> signInWithApple();
 
   /// Signs up with [email] and [password].
   Future<Result<AuthUser>> signUp({

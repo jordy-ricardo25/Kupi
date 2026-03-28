@@ -39,11 +39,11 @@ class SupabaseUserRepository implements UserRepository {
       debugPrint(e.toString());
 
       return Result.failure(
-        e is AppException
-            ? e.message
-            : 'Ocurrió un error al obtener el usuario actual.'
-                  '\n'
-                  'Inténtalo de nuevo más tarde.',
+        _extractError(
+          e,
+          fallback:
+              'Ocurrió un error al obtener el usuario actual.\nInténtalo de nuevo más tarde.',
+        ),
       );
     }
   }
@@ -77,11 +77,11 @@ class SupabaseUserRepository implements UserRepository {
       debugPrint(e.toString());
 
       return Result.failure(
-        e is AppException
-            ? e.message
-            : 'Ocurrió un error al obtener el usuario solicitado.'
-                  '\n'
-                  'Inténtalo de nuevo más tarde.',
+        _extractError(
+          e,
+          fallback:
+              'Ocurrió un error al obtener el usuario solicitado.\nInténtalo de nuevo más tarde.',
+        ),
       );
     }
   }
@@ -96,16 +96,21 @@ class SupabaseUserRepository implements UserRepository {
     required String planId,
   }) async {
     try {
+      final payload = <String, dynamic>{
+        'id': id,
+        'display_name': displayName,
+        'email': email,
+        'picture_url': pictureUrl,
+        'device_token': deviceToken,
+      };
+
+      if (planId.isNotEmpty) {
+        payload['plan_id'] = planId;
+      }
+
       final entity = await _client
           .from('user')
-          .insert({
-            'id': id,
-            'display_name': displayName,
-            'email': email,
-            'picture_url': pictureUrl,
-            'device_token': deviceToken,
-            'plan_id': planId,
-          })
+          .insert(payload)
           .select()
           .single()
           .withConverter((v) {
@@ -117,11 +122,11 @@ class SupabaseUserRepository implements UserRepository {
       debugPrint(e.toString());
 
       return Result.failure(
-        e is AppException
-            ? e.message
-            : 'Ocurrió un error al crear el usuario.'
-                  '\n'
-                  'Inténtalo de nuevo más tarde.',
+        _extractError(
+          e,
+          fallback:
+              'Ocurrió un error al crear el usuario.\nInténtalo de nuevo más tarde.',
+        ),
       );
     }
   }
@@ -134,7 +139,7 @@ class SupabaseUserRepository implements UserRepository {
     String? deviceToken,
     String? planId,
   }) async {
-    final updates = const <String, dynamic>{};
+    final updates = <String, dynamic>{};
 
     try {
       if (displayName != null && displayName.isNotEmpty) {
@@ -170,12 +175,21 @@ class SupabaseUserRepository implements UserRepository {
       debugPrint(e.toString());
 
       return Result.failure(
-        e is AppException
-            ? e.message
-            : 'Ocurrió un error al actualizar el usuario.'
-                  '\n'
-                  'Inténtalo de nuevo más tarde.',
+        _extractError(
+          e,
+          fallback:
+              'Ocurrió un error al actualizar el usuario.\nInténtalo de nuevo más tarde.',
+        ),
       );
     }
+  }
+
+  String _extractError(Object error, {required String fallback}) {
+    if (error is AppException) return error.message;
+
+    final message = error.toString().replaceFirst('Exception: ', '').trim();
+    if (message.isEmpty) return fallback;
+
+    return message;
   }
 }

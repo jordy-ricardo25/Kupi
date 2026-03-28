@@ -17,3 +17,4 @@ class AuthCard extends ConsumerWidget {
     );
   }
 }
+

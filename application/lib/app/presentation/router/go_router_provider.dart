@@ -14,15 +14,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final location = state.matchedLocation;
       final loggedIn = ref.read(authStateProvider).isAuthenticated;
 
-      // if (location == SplashPage.routePath ||
-      //     location == UpdatePasswordPage.routePath) {
-      //   return null;
-      // }
-
       const publicRoutes = [
         SignInPage.routePath,
         SignUpPage.routePath,
-        // ResetPasswordPage.routePath,
+        ResetPasswordPage.routePath,
+        UpdatePasswordPage.routePath,
       ];
 
       final isPublicRoute = publicRoutes.contains(location);
@@ -32,7 +28,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       }
 
       if (loggedIn && isPublicRoute) {
-        return '/home';
+        return '/';
       }
 
       return null;

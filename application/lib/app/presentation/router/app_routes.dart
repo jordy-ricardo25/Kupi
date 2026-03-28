@@ -33,18 +33,18 @@ final appRoutes = <RouteBase>[
   /// =====================
   /// PASSWORD
   /// =====================
-  // GoRoute(
-  //   path: ResetPasswordPage.routePath,
-  //   builder: (_, _) {
-  //     return const ResetPasswordPage();
-  //   },
-  // ),
-  // GoRoute(
-  //   path: UpdatePasswordPage.routePath,
-  //   builder: (_, _) {
-  //     return const UpdatePasswordPage();
-  //   },
-  // ),
+  GoRoute(
+    path: ResetPasswordPage.routePath,
+    builder: (_, _) {
+      return const ResetPasswordPage();
+    },
+  ),
+  GoRoute(
+    path: UpdatePasswordPage.routePath,
+    builder: (_, _) {
+      return const UpdatePasswordPage();
+    },
+  ),
 
   /// =====================
   /// APP SHELL (ROOT)

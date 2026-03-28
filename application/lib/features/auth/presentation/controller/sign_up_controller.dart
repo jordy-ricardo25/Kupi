@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:kupi/core/exceptions/index.dart';
+import 'package:kupi/core/utils/index.dart';
 import 'package:kupi/features/auth/index.dart';
 import 'package:kupi/features/user/index.dart';
 
@@ -15,6 +17,9 @@ final class SignUpController {
     required String password,
   }) async {
     final notifier = _ref.read(signUpMutationProvider.notifier);
+    final normalizedName = AuthValidators.normalizeName(name);
+    final normalizedEmail = AuthValidators.normalizeEmail(email);
+    final normalizedPassword = AuthValidators.normalizePassword(password);
 
     notifier.state = notifier.state.copyWith(
       isLoading: true,
@@ -23,27 +28,49 @@ final class SignUpController {
     );
 
     try {
-      if (name.trim().isEmpty) {
-        throw AuthException('Ingresa tu nombre completo.');
-      }
+      final nameError = AuthValidators.validateFullName(normalizedName);
+      if (nameError != null) throw AuthException(nameError);
 
-      if (email.trim().isEmpty) {
-        throw AuthException('Ingresa un correo electrónico válido.');
-      }
+      final emailError = AuthValidators.validateEmail(
+        normalizedEmail,
+        emptyMessage: 'Ingresa un correo electrónico válido.',
+        invalidMessage: 'Ingresa un correo electrónico válido.',
+      );
+      if (emailError != null) throw AuthException(emailError);
 
-      if (password.trim().isEmpty) {
-        throw AuthException('Ingresa una contraseña válida.');
-      }
+      final passwordError = AuthValidators.validateSixDigitsPassword(
+        normalizedPassword,
+        emptyMessage: 'Ingresa una contraseña válida.',
+      );
+      if (passwordError != null) throw AuthException(passwordError);
 
       final user = await _ref
           .read(authRepositoryProvider)
-          .signUp(email: email, password: password)
+          .signUp(email: normalizedEmail, password: normalizedPassword)
           .then((r) => r.fold((e) => throw AuthException(e), (v) => v));
 
-      await _ref
-          .read(userRepositoryProvider)
-          .create(id: user.id, displayName: name, email: email, planId: '')
-          .then((r) => r.fold((e) => throw AuthException(e), (_) => {}));
+      final userRepository = _ref.read(userRepositoryProvider);
+
+      final profileResult = await userRepository.create(
+        id: user.id,
+        displayName: normalizedName,
+        email: normalizedEmail,
+        planId: 'free',
+      );
+
+      final fallbackResult = await profileResult.fold((_) {
+        return userRepository.create(
+          id: user.id,
+          displayName: normalizedName,
+          email: normalizedEmail,
+          planId: '',
+        );
+      }, (_) async => profileResult);
+
+      fallbackResult.fold(
+        (e) => debugPrint('Profile creation failed after sign up: $e'),
+        (_) {},
+      );
 
       notifier.state = notifier.state.copyWith(isLoading: false);
     } catch (e) {
