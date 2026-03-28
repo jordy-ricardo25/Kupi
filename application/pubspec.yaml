@@ -146,6 +146,11 @@ flutter:
   assets:
     - .env
 
+  fonts:
+    - family: Memsmark!
+      fonts:
+        - asset: assets/fonts/Memsmark!.otf
+
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
