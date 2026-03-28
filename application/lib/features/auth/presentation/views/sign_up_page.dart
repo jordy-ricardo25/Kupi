@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import 'package:kupi/core/utils/index.dart';
+import 'package:kupi/features/auth/index.dart';
 
 final class SignUpPage extends ConsumerStatefulWidget {
   static const routePath = '/signup';
@@ -13,14 +17,449 @@ final class SignUpPage extends ConsumerStatefulWidget {
 }
 
 class _SignUpPageState extends ConsumerState<SignUpPage> {
+  static const brandPurple = Color(0xFF813EF4);
+
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  final formKey = GlobalKey<FormState>();
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    emailController.addListener(_normalizeEmailInput);
+    passwordController.addListener(_normalizePasswordInput);
+  }
+
+  void _normalizeEmailInput() {
+    final raw = emailController.text;
+    final normalized = raw
+        .toLowerCase()
+        .replaceAll(' ', '')
+        .replaceAll(RegExp(r'[^a-z0-9@._+\-]'), '');
+
+    if (raw == normalized) return;
+
+    emailController.value = TextEditingValue(
+      text: normalized,
+      selection: TextSelection.collapsed(offset: normalized.length),
+    );
+  }
+
+  void _normalizePasswordInput() {
+    final raw = passwordController.text;
+    var normalized = raw.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (normalized.length > 6) {
+      normalized = normalized.substring(0, 6);
+    }
+
+    if (raw == normalized) return;
+
+    passwordController.value = TextEditingValue(
+      text: normalized,
+      selection: TextSelection.collapsed(offset: normalized.length),
+    );
+  }
+
+  @override
+  void dispose() {
+    emailController.removeListener(_normalizeEmailInput);
+    passwordController.removeListener(_normalizePasswordInput);
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final isValid = formKey.currentState?.validate() ?? false;
+    if (!isValid) return;
+
+    await ref
+        .read(signUpControllerProvider)
+        .mutate(
+          name: nameController.text.trim(),
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+  }
+
+  String? _validateName(String? value) {
+    final name = value?.trim() ?? '';
+    if (name.isEmpty) return 'Ingresa tu nombre completo.';
+    if (name.length < 3) return 'Tu nombre debe tener al menos 3 caracteres.';
+
+    return null;
+  }
+
+  String? _validateEmail(String? value) {
+    final email = value?.trim() ?? '';
+    if (email.isEmpty) return 'Ingresa tu correo electrónico.';
+
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailRegex.hasMatch(email)) {
+      return 'Ingresa un correo válido.';
+    }
+
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    final password = value?.trim() ?? '';
+    if (password.isEmpty) return 'Ingresa tu contraseña.';
+    if (!RegExp(r'^\d{6}$').hasMatch(password)) {
+      return 'La contraseña debe tener exactamente 6 dígitos.';
+    }
+
+    return null;
+  }
+
+  Widget _buildOrb({
+    required double size,
+    required Alignment alignment,
+    required List<Color> colors,
+  }) {
+    return Align(
+      alignment: alignment,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(colors: colors, stops: const [0.0, 1.0]),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSocialButton({
+    required String label,
+    required Widget icon,
+    required VoidCallback? onPressed,
+  }) {
+    return SizedBox(
+      height: 52,
+      child: OutlinedButton.icon(
+        onPressed: onPressed,
+        icon: icon,
+        label: Text(
+          label,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF212126),
+          backgroundColor: Colors.white,
+          side: const BorderSide(color: Color(0xFFE7E3F1)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final mutation = ref.watch(signUpMutationProvider);
+
+    ref.listen(signUpMutationProvider, (previous, next) {
+      if (previous?.hasError == true && next.hasError) return;
+
+      if (next.hasError && next.error != null) {
+        showSnackbar(context, next.error!);
+        return;
+      }
+
+      final finishedLoading = previous?.isLoading == true && !next.isLoading;
+      if (finishedLoading && !next.hasError) {
+        showSnackbar(
+          context,
+          'Cuenta creada con éxito. Revisa tu correo y luego inicia sesión.',
+        );
+
+        Future.delayed(const Duration(milliseconds: 600), () {
+          if (!mounted) return;
+          context.go(SignInPage.routePath);
+        });
+      }
+    });
+
     return Scaffold(
       key: scaffoldKey,
-
-      body: const Center(child: Text('Sign Up Page')),
+      backgroundColor: const Color(0xFFF7F5FD),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            _buildOrb(
+              size: 280,
+              alignment: const Alignment(-1.15, -1.05),
+              colors: [
+                brandPurple.withValues(alpha: 0.16),
+                brandPurple.withValues(alpha: 0.03),
+              ],
+            ),
+            _buildOrb(
+              size: 190,
+              alignment: const Alignment(1.2, -0.95),
+              colors: [brandPurple.withValues(alpha: 0.12), Colors.transparent],
+            ),
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 410),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(color: const Color(0xFFEBE5F7)),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x190F0C1F),
+                          blurRadius: 30,
+                          offset: Offset(0, 14),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 24, 22, 20),
+                      child: Form(
+                        key: formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: brandPurple,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: const BoxDecoration(
+                                        color: brandPurple,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                const Text(
+                                  'Kupi',
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.6,
+                                    color: Color(0xFF15151B),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 18),
+                            const Text(
+                              'Crea tu\ncuenta',
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.w800,
+                                height: 1.02,
+                                color: Color(0xFF16161D),
+                                letterSpacing: -1.0,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Regístrate para empezar con Kupi en segundos.',
+                              style: Theme.of(context).textTheme.bodyLarge
+                                  ?.copyWith(
+                                    color: const Color(0xFF81808D),
+                                    height: 1.24,
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 22),
+                            NameFormField(
+                              controller: nameController,
+                              validator: _validateName,
+                              labelText: 'NOMBRE COMPLETO',
+                              hintText: 'Ej. Alex Thompson',
+                              backgroundColor: Colors.white,
+                            ),
+                            const SizedBox(height: 12),
+                            EmailFormField(
+                              controller: emailController,
+                              validator: _validateEmail,
+                              labelText: 'CORREO ELECTRÓNICO',
+                              hintText: 'nombre@ejemplo.com',
+                              backgroundColor: Colors.white,
+                            ),
+                            const SizedBox(height: 12),
+                            PasswordFormField(
+                              controller: passwordController,
+                              validator: _validatePassword,
+                              labelText: 'CONTRASEÑA',
+                              hintText: '6 dígitos',
+                              backgroundColor: Colors.white,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6.0, left: 4),
+                              child: Text(
+                                'Usa solo 6 dígitos numéricos.',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: const Color(0xFF8A8A99)),
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            Container(
+                              height: 56,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(18),
+                                gradient: const LinearGradient(
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                  colors: [Color(0xFF6F31E8), brandPurple],
+                                ),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color(0x3D813EF4),
+                                    blurRadius: 18,
+                                    offset: Offset(0, 10),
+                                  ),
+                                ],
+                              ),
+                              child: FilledButton(
+                                onPressed: mutation.isLoading ? null : _submit,
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                  foregroundColor: Colors.white,
+                                  disabledBackgroundColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                  textStyle: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                child: mutation.isLoading
+                                    ? const SizedBox(
+                                        height: 22,
+                                        width: 22,
+                                        child:
+                                            CircularProgressIndicator.adaptive(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation(
+                                                    Colors.white,
+                                                  ),
+                                            ),
+                                      )
+                                    : const Text('Crear Cuenta'),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              'O continúa con tu cuenta social',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: const Color(0xFF8A8996),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 14),
+                            _buildSocialButton(
+                              label: 'Registrarme con Google',
+                              onPressed: mutation.isLoading
+                                  ? null
+                                  : () {
+                                      showSnackbar(
+                                        context,
+                                        'Google login estará disponible pronto.',
+                                      );
+                                    },
+                              icon: Container(
+                                width: 24,
+                                height: 24,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Color(0xFFF3F5FF),
+                                ),
+                                alignment: Alignment.center,
+                                child: const Text(
+                                  'G',
+                                  style: TextStyle(
+                                    color: Color(0xFF2C67F2),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            _buildSocialButton(
+                              label: 'Registrarme con Apple',
+                              onPressed: mutation.isLoading
+                                  ? null
+                                  : () {
+                                      showSnackbar(
+                                        context,
+                                        'Apple login estará disponible pronto.',
+                                      );
+                                    },
+                              icon: const Icon(Icons.apple, size: 20),
+                            ),
+                            const SizedBox(height: 14),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '¿Ya tienes una cuenta? ',
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: const Color(0xFF777686),
+                                      ),
+                                ),
+                                TextButton(
+                                  onPressed: mutation.isLoading
+                                      ? null
+                                      : () {
+                                          context.pop();
+                                        },
+                                  child: const Text(
+                                    'Iniciar Sesión',
+                                    style: TextStyle(
+                                      color: brandPurple,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

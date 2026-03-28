@@ -6,6 +6,9 @@ import 'package:supabase_flutter/supabase_flutter.dart'
     hide AuthUser, AuthException;
 
 final class SupabaseAuthRepository implements AuthRepository {
+  static const _signInRedirect = 'kupi://auth/signin';
+  static const _updatePasswordRedirect = 'kupi://auth/update-password';
+
   final SupabaseClient _client;
 
   const SupabaseAuthRepository(this._client);
@@ -29,9 +32,10 @@ final class SupabaseAuthRepository implements AuthRepository {
       return Result.success(user);
     } catch (e) {
       return Result.failure(
-        e is AppException
-            ? e.message
-            : 'El correo o la contraseña no son correctos.',
+        _extractError(
+          e,
+          fallback: 'El correo o la contraseña no son correctos.',
+        ),
       );
     }
   }
@@ -45,19 +49,21 @@ final class SupabaseAuthRepository implements AuthRepository {
       final res = await _client.auth.signUp(
         email: email,
         password: password,
-        emailRedirectTo: 'https://app.paralelo.ec/signin',
+        emailRedirectTo: _signInRedirect,
       );
 
-      final user = _mapUser(res.user);
+      final user = _mapUser(res.user ?? _client.auth.currentUser);
       if (user == null) {
-        throw AuthException('No se pudo crear el usuario');
+        throw AuthException(
+          'No se pudo recuperar la sesión después del registro. Revisa tu correo de confirmación e intenta iniciar sesión.',
+        );
       }
 
       return Result.success(user);
-    } on AppException catch (e) {
-      return Result.failure(e.message);
-    } catch (_) {
-      return Result.failure('Error inesperado');
+    } catch (e) {
+      return Result.failure(
+        _extractError(e, fallback: 'No se pudo completar el registro.'),
+      );
     }
   }
 
@@ -66,11 +72,16 @@ final class SupabaseAuthRepository implements AuthRepository {
     try {
       await _client.auth.resetPasswordForEmail(
         email,
-        redirectTo: 'https://app.paralelo.ec/update-password',
+        redirectTo: _updatePasswordRedirect,
       );
       return Result.success(null);
     } catch (e) {
-      return Result.failure('Error inesperado');
+      return Result.failure(
+        _extractError(
+          e,
+          fallback: 'No se pudo enviar el correo de recuperación.',
+        ),
+      );
     }
   }
 
@@ -80,7 +91,9 @@ final class SupabaseAuthRepository implements AuthRepository {
       await _client.auth.updateUser(UserAttributes(password: password));
       return Result.success(null);
     } catch (e) {
-      return Result.failure('Error inesperado');
+      return Result.failure(
+        _extractError(e, fallback: 'No se pudo actualizar la contraseña.'),
+      );
     }
   }
 
@@ -90,7 +103,7 @@ final class SupabaseAuthRepository implements AuthRepository {
       await _client.auth.signOut();
       return Result.success(null);
     } catch (_) {
-      return Result.failure('Error inesperado');
+      return Result.failure('No se pudo cerrar sesión.');
     }
   }
 
@@ -103,5 +116,14 @@ final class SupabaseAuthRepository implements AuthRepository {
   AuthUser? _mapUser(User? user) {
     if (user == null) return null;
     return AuthUserModel(user.id, email: user.email!);
+  }
+
+  String _extractError(Object error, {required String fallback}) {
+    if (error is AppException) return error.message;
+
+    final message = error.toString().replaceFirst('Exception: ', '').trim();
+    if (message.isEmpty) return fallback;
+
+    return message;
   }
 }
