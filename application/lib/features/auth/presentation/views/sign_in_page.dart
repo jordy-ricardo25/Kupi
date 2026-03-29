@@ -70,18 +70,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
     await ref
         .read(signInControllerProvider)
-        .mutate(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim(),
-        );
-  }
-
-  String? _validateEmail(String? value) {
-    return AuthValidators.validateEmail(value);
-  }
-
-  String? _validatePassword(String? value) {
-    return AuthValidators.validateSixDigitsPassword(value);
+        .mutate(email: emailController.text, password: passwordController.text);
   }
 
   Widget _buildOrb({
@@ -184,43 +173,18 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: brandPurple,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: const BoxDecoration(
-                                        color: brandPurple,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                const Text(
-                                  'Kupi',
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -0.6,
-                                    color: Color(0xFF15151B),
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
+                            const Text(
+                              'kupi',
+                              style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w800,
+                                fontFamily: 'Memsmark!',
+                                letterSpacing: 1.25,
+                                color: Color(0xFF813EF4),
+                              ),
+                              textAlign: TextAlign.center,
                             ),
+
                             const SizedBox(height: 20),
                             const Text(
                               'Bienvenido de\nregreso',
@@ -246,7 +210,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                             const SizedBox(height: 24),
                             EmailFormField(
                               controller: emailController,
-                              validator: _validateEmail,
+                              validator: AuthValidators.validateEmail,
                               labelText: 'CORREO ELECTRÓNICO',
                               hintText: 'nombre@ejemplo.com',
                               backgroundColor: Colors.white,
@@ -254,7 +218,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                             const SizedBox(height: 12),
                             PasswordFormField(
                               controller: passwordController,
-                              validator: _validatePassword,
+                              validator:
+                                  AuthValidators.validateSixDigitsPassword,
                               labelText: 'CONTRASEÑA',
                               hintText: '6 dígitos',
                               backgroundColor: Colors.white,
