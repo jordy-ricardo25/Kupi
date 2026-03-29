@@ -147,6 +147,9 @@ flutter:
     - .env
 
   fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter.ttf
     - family: Memsmark!
       fonts:
         - asset: assets/fonts/Memsmark!.otf

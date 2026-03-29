@@ -4,31 +4,31 @@ final class AppColorScheme {
   // 🌞 LIGHT
   static final ColorScheme light = ColorScheme.fromSeed(
     brightness: Brightness.light,
-    seedColor: const Color(0xFF3B82F6),
+    seedColor: const Color(0xFF813EF4),
 
     // Primary
-    primary: const Color(0xFF3B82F6),
+    primary: const Color(0xFF813EF4),
     onPrimary: const Color(0xFFFFFFFF),
-    primaryContainer: const Color(0xFFD8E2FF),
-    onPrimaryContainer: const Color(0xFF001A42),
+    primaryContainer: const Color(0xFFEADDFF),
+    onPrimaryContainer: const Color(0xFF24005B),
 
     // Secondary
-    secondary: const Color(0xFFFCBE2B),
+    secondary: const Color(0xFF635B70),
     onSecondary: const Color(0xFFFFFFFF),
-    secondaryContainer: const Color(0xFFFFDEA3),
-    onSecondaryContainer: const Color(0xFF261900),
+    secondaryContainer: const Color(0xFFE9DEF8),
+    onSecondaryContainer: const Color(0xFF24005A),
 
     // Tertiary
-    tertiary: const Color(0xFF1E40AF),
+    tertiary: const Color(0xFF7E525E),
     onTertiary: const Color(0xFFFFFFFF),
-    tertiaryContainer: const Color(0xFFDDE1FF),
-    onTertiaryContainer: const Color(0xFF001453),
+    tertiaryContainer: const Color(0xFFFFD9E1),
+    onTertiaryContainer: const Color(0xFF3F001B),
 
     // Surfaces
-    surface: const Color(0xFFFBF8FF),
-    onSurface: const Color(0xFF111827),
-    inverseSurface: const Color(0xFFDBEAFE),
-    onInverseSurface: const Color(0xFF111827),
+    surface: const Color(0xFFFEF7FF),
+    onSurface: const Color(0xFF260058),
+    inverseSurface: const Color(0xFF322F35),
+    onInverseSurface: const Color(0xFFF5EFF7),
 
     // Error
     error: const Color(0xFFEF4444),
@@ -38,31 +38,31 @@ final class AppColorScheme {
   // 🌙 DARK
   static final ColorScheme dark = ColorScheme.fromSeed(
     brightness: Brightness.dark,
-    seedColor: const Color(0xFF3B82F6),
+    seedColor: const Color(0xFF813EF4),
 
     // Primary
-    primary: const Color(0xFF3B82F6),
+    primary: const Color(0xFF813EF4),
     onPrimary: const Color(0xFFFFFFFF),
-    primaryContainer: const Color(0xFF1E40AF),
-    onPrimaryContainer: const Color(0xFFE5E7EB),
+    primaryContainer: const Color(0xFFEADDFF),
+    onPrimaryContainer: const Color(0xFF24005B),
 
     // Secondary
-    secondary: const Color(0xFFFCBE2B),
-    onSecondary: const Color(0xFF000000),
-    secondaryContainer: const Color(0xFF7C5A00),
-    onSecondaryContainer: const Color(0xFFFFF3D0),
+    secondary: const Color(0xFFCDC2DB),
+    onSecondary: const Color(0xFF342D40),
+    secondaryContainer: const Color(0xFF4B4358),
+    onSecondaryContainer: const Color(0xFFE9DEF8),
 
     // Tertiary
-    tertiary: const Color(0xFF60A5FA),
-    onTertiary: const Color(0xFF000000),
-    tertiaryContainer: const Color(0xFF1E293B),
-    onTertiaryContainer: const Color(0xFFE5E7EB),
+    tertiary: const Color(0xFFF0B7C5),
+    onTertiary: const Color(0xFF4A2530),
+    tertiaryContainer: const Color(0xFF643B46),
+    onTertiaryContainer: const Color(0xFFFFD9E1),
 
     // Surfaces
-    surface: const Color(0xFF0F172A),
-    onSurface: const Color(0xFFE5E7EB),
-    inverseSurface: const Color(0xFF1E293B),
-    onInverseSurface: const Color(0xFFE5E7EB),
+    surface: const Color(0xFF151218),
+    onSurface: const Color(0xFFE7E0E8),
+    inverseSurface: const Color(0xFFE7E0E8),
+    onInverseSurface: const Color(0xFF322F35),
 
     // Error
     error: const Color(0xFFEF4444),

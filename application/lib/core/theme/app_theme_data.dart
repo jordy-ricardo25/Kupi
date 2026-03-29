@@ -28,25 +28,25 @@ extension AppThemeData on ThemeData {
       applyElevationOverlayColor: brightness == Brightness.dark,
 
       textTheme: const TextTheme(
-        labelSmall: TextStyle(fontSize: 10),
-        labelMedium: TextStyle(fontSize: 12),
-        labelLarge: TextStyle(fontSize: 14),
+        labelSmall: TextStyle(fontFamily: 'Inter', fontSize: 10),
+        labelMedium: TextStyle(fontFamily: 'Inter', fontSize: 12),
+        labelLarge: TextStyle(fontFamily: 'Inter', fontSize: 14),
 
-        bodySmall: TextStyle(fontSize: 12),
-        bodyMedium: TextStyle(fontSize: 14),
-        bodyLarge: TextStyle(fontSize: 16),
+        bodySmall: TextStyle(fontFamily: 'Inter', fontSize: 12),
+        bodyMedium: TextStyle(fontFamily: 'Inter', fontSize: 14),
+        bodyLarge: TextStyle(fontFamily: 'Inter', fontSize: 16),
 
-        titleSmall: TextStyle(fontSize: 14),
-        titleMedium: TextStyle(fontSize: 18),
-        titleLarge: TextStyle(fontSize: 22),
+        titleSmall: TextStyle(fontFamily: 'Inter', fontSize: 14),
+        titleMedium: TextStyle(fontFamily: 'Inter', fontSize: 18),
+        titleLarge: TextStyle(fontFamily: 'Inter', fontSize: 22),
 
-        headlineSmall: TextStyle(fontSize: 24),
-        headlineMedium: TextStyle(fontSize: 30),
-        headlineLarge: TextStyle(fontSize: 36),
+        headlineSmall: TextStyle(fontFamily: 'Inter', fontSize: 24),
+        headlineMedium: TextStyle(fontFamily: 'Inter', fontSize: 30),
+        headlineLarge: TextStyle(fontFamily: 'Inter', fontSize: 36),
 
-        displaySmall: TextStyle(fontSize: 42),
-        displayMedium: TextStyle(fontSize: 50),
-        displayLarge: TextStyle(fontSize: 58),
+        displaySmall: TextStyle(fontFamily: 'Inter', fontSize: 42),
+        displayMedium: TextStyle(fontFamily: 'Inter', fontSize: 50),
+        displayLarge: TextStyle(fontFamily: 'Inter', fontSize: 58),
       ),
 
       dividerTheme: DividerThemeData(color: scheme.outlineVariant),

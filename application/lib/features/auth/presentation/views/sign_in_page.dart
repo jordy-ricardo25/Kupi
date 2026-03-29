@@ -31,30 +31,6 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     passwordController.addListener(_normalizePasswordInput);
   }
 
-  void _normalizeEmailInput() {
-    final raw = emailController.text;
-    final normalized = AuthValidators.normalizeEmailInput(raw);
-
-    if (raw == normalized) return;
-
-    emailController.value = TextEditingValue(
-      text: normalized,
-      selection: TextSelection.collapsed(offset: normalized.length),
-    );
-  }
-
-  void _normalizePasswordInput() {
-    final raw = passwordController.text;
-    final normalized = AuthValidators.normalizePasswordInput(raw);
-
-    if (raw == normalized) return;
-
-    passwordController.value = TextEditingValue(
-      text: normalized,
-      selection: TextSelection.collapsed(offset: normalized.length),
-    );
-  }
-
   @override
   void dispose() {
     emailController.removeListener(_normalizeEmailInput);
@@ -62,59 +38,6 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final isValid = formKey.currentState?.validate() ?? false;
-    if (!isValid) return;
-
-    await ref
-        .read(signInControllerProvider)
-        .mutate(email: emailController.text, password: passwordController.text);
-  }
-
-  Widget _buildOrb({
-    required double size,
-    required Alignment alignment,
-    required List<Color> colors,
-  }) {
-    return Align(
-      alignment: alignment,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(colors: colors, stops: const [0.0, 1.0]),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSocialButton({
-    required String label,
-    required Widget icon,
-    required VoidCallback? onPressed,
-  }) {
-    return SizedBox(
-      height: 52,
-      child: OutlinedButton.icon(
-        onPressed: onPressed,
-        icon: icon,
-        label: Text(
-          label,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-        ),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF212126),
-          backgroundColor: Colors.white,
-          side: const BorderSide(color: Color(0xFFE7E3F1)),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -189,6 +112,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                             const Text(
                               'Bienvenido de\nregreso',
                               style: TextStyle(
+                                fontFamily: 'Inter',
                                 fontSize: 36,
                                 fontWeight: FontWeight.w800,
                                 height: 1.02,
@@ -202,6 +126,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                               'Inicia sesión para continuar con tu cuenta.',
                               style: Theme.of(context).textTheme.bodyLarge
                                   ?.copyWith(
+                                    fontFamily: 'Inter',
                                     color: const Color(0xFF81808D),
                                     height: 1.24,
                                   ),
@@ -378,6 +303,83 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _normalizeEmailInput() {
+    final raw = emailController.text;
+    final normalized = AuthValidators.normalizeEmailInput(raw);
+
+    if (raw == normalized) return;
+
+    emailController.value = TextEditingValue(
+      text: normalized,
+      selection: TextSelection.collapsed(offset: normalized.length),
+    );
+  }
+
+  void _normalizePasswordInput() {
+    final raw = passwordController.text;
+    final normalized = AuthValidators.normalizePasswordInput(raw);
+
+    if (raw == normalized) return;
+
+    passwordController.value = TextEditingValue(
+      text: normalized,
+      selection: TextSelection.collapsed(offset: normalized.length),
+    );
+  }
+
+  Future<void> _submit() async {
+    final isValid = formKey.currentState?.validate() ?? false;
+    if (!isValid) return;
+
+    await ref
+        .read(signInControllerProvider)
+        .mutate(email: emailController.text, password: passwordController.text);
+  }
+
+  Widget _buildOrb({
+    required double size,
+    required Alignment alignment,
+    required List<Color> colors,
+  }) {
+    return Align(
+      alignment: alignment,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(colors: colors, stops: const [0.0, 1.0]),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSocialButton({
+    required String label,
+    required Widget icon,
+    required VoidCallback? onPressed,
+  }) {
+    return SizedBox(
+      height: 52,
+      child: OutlinedButton.icon(
+        onPressed: onPressed,
+        icon: icon,
+        label: Text(
+          label,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF212126),
+          backgroundColor: Colors.white,
+          side: const BorderSide(color: Color(0xFFE7E3F1)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
         ),
       ),
     );
