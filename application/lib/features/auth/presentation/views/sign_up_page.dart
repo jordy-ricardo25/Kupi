@@ -212,7 +212,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
             ],
           ),
         ),
-      ),
+      ).dismissKeyboard(context),
     );
   }
 

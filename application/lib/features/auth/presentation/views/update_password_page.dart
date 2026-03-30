@@ -1,12 +1,14 @@
 import 'package:easy_localization/easy_localization.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
+
 import 'package:go_router/go_router.dart';
+
 import 'package:kupi/app/index.dart';
 import 'package:kupi/core/extensions/index.dart';
-
 import 'package:kupi/core/utils/index.dart';
 import 'package:kupi/core/validation/index.dart';
 import 'package:kupi/features/auth/index.dart';
@@ -188,7 +190,7 @@ class _UpdatePasswordPageState extends ConsumerState<UpdatePasswordPage> {
             ),
           ),
         ),
-      ),
+      ).dismissKeyboard(context),
     );
   }
 

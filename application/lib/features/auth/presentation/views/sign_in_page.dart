@@ -224,7 +224,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           ],
         ),
       ),
-    );
+    ).dismissKeyboard(context);
   }
 
   Widget orb({

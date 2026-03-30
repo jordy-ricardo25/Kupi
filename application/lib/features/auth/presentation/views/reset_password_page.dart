@@ -171,7 +171,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
             ),
           ),
         ),
-      ),
+      ).dismissKeyboard(context),
     );
   }
 
