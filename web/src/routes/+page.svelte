@@ -1,6 +1,5 @@
 <main>
   <h1>Welcome to Kupi</h1>
-  <a href="https://kupi.msbx.dev">Launch application</a>
 </main>
 
 <style>
@@ -8,10 +7,7 @@
     width: 100dvw;
     height: 100dvh;
 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
+    display: grid;
+    place-items: center;
   }
 </style>
