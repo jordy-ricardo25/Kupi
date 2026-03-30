@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "dev.msbx.kupi",
+      "sha256_cert_fingerprints": [
+        "15:59:6D:7A:8E:C3:CC:4D:AB:15:B6:CA:1E:FE:3B:E7:4B:33:62:6A:70:DC:2F:02:68:FA:AA:8D:3B:9D:18:98",
+        "E6:30:67:9C:CC:A7:8E:7F:AD:3C:2A:E2:FD:D0:93:CF:38:C5:03:A9:6F:0B:AF:5C:92:C4:43:21:B4:4B:A2:D8"
+      ]
+    }
+  }
+]

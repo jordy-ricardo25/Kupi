@@ -1,0 +1,69 @@
+{
+  "app": {
+    "name": "kupi"
+  },
+  "common": {
+    "actions": {
+      "back": "Volver",
+      "close": "Cerrar",
+      "sign_in": "Iniciar sesión",
+      "sign_up": "Registrarse",
+      "create_account": "Crear cuenta"
+    },
+    "fields": {
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "confirm_password": "Confirmar contraseña"
+    },
+    "social": {
+      "google": "Google",
+      "apple": "Apple"
+    }
+  },
+  "auth": {
+    "sign_in": {
+      "title": "¡Bienvenido de nuevo!",
+      "subtitle": "Planifica tus comidas y compra mejor.",
+      "email_hint": "Ingresa tu correo electrónico",
+      "password_hint": "Ingresa tu contraseña",
+      "forgot_password": "¿Olvidaste tu contraseña?",
+      "or_continue_with": "o continúa con",
+      "no_account": "¿No tienes una cuenta?"
+    },
+    "sign_up": {
+      "title": "Crea tu cuenta",
+      "subtitle": "Regístrate para empezar con Kupi en segundos.",
+      "name_hint": "Ingresa tu nombre completo",
+      "password_hint": "Mínimo 8 caracteres",
+      "confirm_password_hint": "Repite tu contraseña",
+      "success_message": "Cuenta creada con éxito. Revisa tu correo y luego inicia sesión.",
+      "legal": {
+        "accept_prefix": "Al continuar aceptas los",
+        "and": "y",
+        "terms_of_service": "términos de servicio",
+        "privacy_policy": "política de privacidad"
+      }
+    }
+  },
+  "validation": {
+    "must_accept_terms": "Debes aceptar los términos",
+    "select_option": "Selecciona una opción",
+    "required_field": "Campo obligatorio",
+    "min_characters": "Mínimo {min} caracteres",
+    "min_items": "Mínimo {min} elementos",
+    "max_items": "Máximo {max} elementos",
+    "exact_items": "Debe tener {count} elementos",
+    "non_negative": "No puede ser negativo",
+    "greater_than": "Debe ser mayor que {min}",
+    "greater_or_equal": "Debe ser mayor o igual a {min}",
+    "less_than": "Debe ser menor que {max}",
+    "less_or_equal": "Debe ser menor o igual a {max}",
+    "between": "Debe estar entre {min} y {max}",
+    "max_decimals": "Máximo {decimals} decimales",
+    "integer_only": "Debe ser un número entero",
+    "invalid_email": "Correo inválido",
+    "no_match": "No coincide",
+    "must_be_number": "Debe ser un número"
+  }
+}

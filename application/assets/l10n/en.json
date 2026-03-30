@@ -1,0 +1,69 @@
+{
+  "app": {
+    "name": "kupi"
+  },
+  "common": {
+    "actions": {
+      "back": "Back",
+      "close": "Close",
+      "sign_in": "Sign in",
+      "sign_up": "Sign up",
+      "create_account": "Create account"
+    },
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "confirm_password": "Confirm password"
+    },
+    "social": {
+      "google": "Google",
+      "apple": "Apple"
+    }
+  },
+  "auth": {
+    "sign_in": {
+      "title": "Welcome back!",
+      "subtitle": "Plan your meals and shop smarter.",
+      "email_hint": "Enter your email",
+      "password_hint": "Enter your password",
+      "forgot_password": "Forgot your password?",
+      "or_continue_with": "or continue with",
+      "no_account": "Don't have an account?"
+    },
+    "sign_up": {
+      "title": "Create your account",
+      "subtitle": "Sign up and get started with Kupi in seconds.",
+      "name_hint": "Enter your full name",
+      "password_hint": "At least 8 characters",
+      "confirm_password_hint": "Repeat your password",
+      "success_message": "Account created successfully. Check your email and then sign in.",
+      "legal": {
+        "accept_prefix": "By continuing, you accept the",
+        "and": "and",
+        "terms_of_service": "terms of service",
+        "privacy_policy": "privacy policy"
+      }
+    }
+  },
+  "validation": {
+    "must_accept_terms": "You must accept the terms",
+    "select_option": "Select an option",
+    "required_field": "This field is required",
+    "min_characters": "Minimum {min} characters",
+    "min_items": "Minimum {min} items",
+    "max_items": "Maximum {max} items",
+    "exact_items": "Must contain {count} items",
+    "non_negative": "Cannot be negative",
+    "greater_than": "Must be greater than {min}",
+    "greater_or_equal": "Must be greater than or equal to {min}",
+    "less_than": "Must be less than {max}",
+    "less_or_equal": "Must be less than or equal to {max}",
+    "between": "Must be between {min} and {max}",
+    "max_decimals": "Maximum {decimals} decimals",
+    "integer_only": "Must be an integer",
+    "invalid_email": "Invalid email",
+    "no_match": "Does not match",
+    "must_be_number": "Must be a number"
+  }
+}
