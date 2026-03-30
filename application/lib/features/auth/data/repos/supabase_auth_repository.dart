@@ -141,6 +141,10 @@ final class SupabaseAuthRepository implements AuthRepository {
       final opened = await _client.auth.signInWithOAuth(
         provider,
         redirectTo: _signInRedirect,
+        authScreenLaunchMode: LaunchMode.inAppWebView,
+        queryParams: provider == OAuthProvider.google
+            ? {'prompt': 'select_account consent'}
+            : null,
       );
 
       return opened;
