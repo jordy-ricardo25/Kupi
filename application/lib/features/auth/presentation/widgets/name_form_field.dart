@@ -68,7 +68,8 @@ class _NameFormFieldState extends ConsumerState<NameFormField> {
 
       decoration: InputDecoration(
         filled: true,
-        fillColor: widget.backgroundColor ?? Colors.transparent,
+        fillColor:
+            widget.backgroundColor ?? Colors.grey.withValues(alpha: 0.15),
 
         enabledBorder: inputBorder(),
         focusedBorder: inputBorder(),
@@ -82,7 +83,7 @@ class _NameFormFieldState extends ConsumerState<NameFormField> {
 
         prefixIcon: Icon(
           LucideIcons.user,
-          color: Theme.of(context).colorScheme.outline,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
         suffixIcon: controller.text.isNotEmpty
             ? InkWell(
@@ -102,8 +103,8 @@ class _NameFormFieldState extends ConsumerState<NameFormField> {
 
   InputBorder inputBorder() {
     return OutlineInputBorder(
-      borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-      borderRadius: BorderRadius.circular(12.0),
+      borderSide: BorderSide.none,
+      borderRadius: BorderRadius.circular(50.0),
     );
   }
 

@@ -1,15 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/foundation.dart';
 
 import 'package:kupi/core/exceptions/index.dart';
-import 'package:kupi/core/utils/index.dart';
 import 'package:kupi/features/auth/index.dart';
+import 'package:kupi/features/plan/index.dart';
 import 'package:kupi/features/user/index.dart';
 
-final class SignUpController {
-  const SignUpController(this._ref);
+import 'package:supabase_flutter/supabase_flutter.dart'
+    show AuthApiException, PostgrestException;
 
+final class SignUpController {
   final Ref _ref;
+
+  const SignUpController(this._ref);
 
   Future<void> mutate({
     required String name,
@@ -17,9 +19,6 @@ final class SignUpController {
     required String password,
   }) async {
     final notifier = _ref.read(signUpMutationProvider.notifier);
-    final normalizedName = AuthValidators.normalizeName(name);
-    final normalizedEmail = AuthValidators.normalizeEmail(email);
-    final normalizedPassword = AuthValidators.normalizePassword(password);
 
     notifier.state = notifier.state.copyWith(
       isLoading: true,
@@ -28,60 +27,53 @@ final class SignUpController {
     );
 
     try {
-      final nameError = AuthValidators.validateFullName(normalizedName);
-      if (nameError != null) throw AuthException(nameError);
+      if (name.trim().isEmpty) {
+        throw AuthException('Ingresa tu nombre completo.');
+      }
 
-      final emailError = AuthValidators.validateEmail(
-        normalizedEmail,
-        emptyMessage: 'Ingresa un correo electrónico válido.',
-        invalidMessage: 'Ingresa un correo electrónico válido.',
-      );
-      if (emailError != null) throw AuthException(emailError);
+      if (email.trim().isEmpty) {
+        throw AuthException('Ingresa un correo electrónico válido.');
+      }
 
-      final passwordError = AuthValidators.validateSixDigitsPassword(
-        normalizedPassword,
-        emptyMessage: 'Ingresa una contraseña válida.',
-      );
-      if (passwordError != null) throw AuthException(passwordError);
+      if (password.trim().isEmpty) {
+        throw AuthException('Ingresa una contraseña válida.');
+      }
 
-      final user = await _ref
-          .read(authRepositoryProvider)
-          .signUp(email: normalizedEmail, password: normalizedPassword)
-          .then((r) => r.fold((e) => throw AuthException(e), (v) => v));
+      final (plan, user) =
+          await Future.wait([
+            _ref.read(planRepositoryProvider).getOne(name: 'Free'),
+            _ref
+                .read(authRepositoryProvider)
+                .signUp(email: email, password: password),
+          ], eagerError: true).then((r) {
+            return (r[0] as Plan, r[1] as AuthUser);
+          });
 
-      final userRepository = _ref.read(userRepositoryProvider);
-
-      final profileResult = await userRepository.create(
-        id: user.id,
-        displayName: normalizedName,
-        email: normalizedEmail,
-        planId: 'free',
-      );
-
-      final fallbackResult = await profileResult.fold((_) {
-        return userRepository.create(
-          id: user.id,
-          displayName: normalizedName,
-          email: normalizedEmail,
-          planId: '',
-        );
-      }, (_) async => profileResult);
-
-      fallbackResult.fold(
-        (e) => debugPrint('Profile creation failed after sign up: $e'),
-        (_) {},
-      );
+      await _ref
+          .read(userRepositoryProvider)
+          .create(
+            id: user.id,
+            displayName: name,
+            email: email,
+            planId: plan.id,
+          );
 
       notifier.state = notifier.state.copyWith(isLoading: false);
     } catch (e) {
+      if (!notifier.mounted) return;
+
       notifier.state = notifier.state.copyWith(
         isLoading: false,
         hasError: true,
-        error: e is AppException
-            ? e.message
-            : 'Ocurrió un error inesperado.'
-                  '\n'
-                  'Inténtalo de nuevo más tarde.',
+        error: switch (e) {
+          AuthApiException ex => ex.message,
+          PostgrestException ex => ex.message,
+          AppException ex => ex.message,
+          _ =>
+            'Ocurrió un error al registrarte.'
+                '\n'
+                'Inténtalo de nuevo más tarde.',
+        },
       );
     }
   }

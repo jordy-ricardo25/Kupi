@@ -1,9 +1,16 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kupi/app/index.dart';
+import 'package:kupi/core/extensions/index.dart';
 
 import 'package:kupi/core/utils/index.dart';
+import 'package:kupi/core/validation/index.dart';
 import 'package:kupi/features/auth/index.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 final class UpdatePasswordPage extends ConsumerStatefulWidget {
   static const routePath = '/update-password';
@@ -17,88 +24,25 @@ final class UpdatePasswordPage extends ConsumerStatefulWidget {
 }
 
 class _UpdatePasswordPageState extends ConsumerState<UpdatePasswordPage> {
-  static const brandPurple = Color(0xFF813EF4);
-
+  final scaffoldKey = GlobalKey<ScaffoldState>();
   final formKey = GlobalKey<FormState>();
+
   final passwordController = TextEditingController();
-  final confirmController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  final passwordValidator = Validator<String>()
+    ..required()
+    ..minLength(8);
+  Validator<String> confirmationValidator(String Function() getPassword) =>
+      Validator<String>()
+        ..required()
+        ..matches(getPassword);
 
   @override
   void initState() {
     super.initState();
-    passwordController.addListener(_normalizePasswordInput);
-    confirmController.addListener(_normalizeConfirmInput);
-  }
 
-  void _normalizePasswordInput() {
-    final raw = passwordController.text;
-    var normalized = raw.replaceAll(RegExp(r'[^0-9]'), '');
-    if (normalized.length > 6) {
-      normalized = normalized.substring(0, 6);
-    }
-
-    if (raw == normalized) return;
-
-    passwordController.value = TextEditingValue(
-      text: normalized,
-      selection: TextSelection.collapsed(offset: normalized.length),
-    );
-  }
-
-  void _normalizeConfirmInput() {
-    final raw = confirmController.text;
-    var normalized = raw.replaceAll(RegExp(r'[^0-9]'), '');
-    if (normalized.length > 6) {
-      normalized = normalized.substring(0, 6);
-    }
-
-    if (raw == normalized) return;
-
-    confirmController.value = TextEditingValue(
-      text: normalized,
-      selection: TextSelection.collapsed(offset: normalized.length),
-    );
-  }
-
-  @override
-  void dispose() {
-    passwordController.removeListener(_normalizePasswordInput);
-    confirmController.removeListener(_normalizeConfirmInput);
-    passwordController.dispose();
-    confirmController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final isValid = formKey.currentState?.validate() ?? false;
-    if (!isValid) return;
-
-    await ref
-        .read(updatePasswordControllerProvider)
-        .mutate(password: passwordController.text.trim());
-  }
-
-  String? _validatePassword(String? value) {
-    final password = value?.trim() ?? '';
-    if (!RegExp(r'^\d{6}$').hasMatch(password)) {
-      return 'La contraseña debe tener exactamente 6 dígitos.';
-    }
-    return null;
-  }
-
-  String? _validateConfirm(String? value) {
-    final confirm = value?.trim() ?? '';
-    if (confirm != passwordController.text.trim()) {
-      return 'Las contraseñas no coinciden.';
-    }
-    return null;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final mutation = ref.watch(updatePasswordMutationProvider);
-
-    ref.listen(updatePasswordMutationProvider, (previous, next) {
+    ref.listenManual(updatePasswordMutationProvider, (previous, next) {
       if (previous?.hasError == true && next.hasError) return;
 
       if (next.hasError && next.error != null) {
@@ -115,103 +59,176 @@ class _UpdatePasswordPageState extends ConsumerState<UpdatePasswordPage> {
         });
       }
     });
+  }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F2FA),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 410),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE9E5F4)),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Text(
-                          'Actualizar contraseña',
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF1A1A1F),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'Define tu nueva contraseña de 6 dígitos.',
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(color: const Color(0xFF808090)),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 24),
-                        PasswordFormField(
-                          controller: passwordController,
-                          validator: _validatePassword,
-                          labelText: 'NUEVA CONTRASEÑA',
-                          hintText: '6 dígitos',
-                          backgroundColor: const Color(0xFFFAFAFD),
-                        ),
-                        const SizedBox(height: 12),
-                        PasswordFormField(
-                          controller: confirmController,
-                          validator: _validateConfirm,
-                          labelText: 'CONFIRMAR CONTRASEÑA',
-                          hintText: '6 dígitos',
-                          backgroundColor: const Color(0xFFFAFAFD),
-                        ),
-                        const SizedBox(height: 18),
-                        Container(
-                          height: 56,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(999),
-                            gradient: const LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: [Color(0xFF6F31E8), brandPurple],
-                            ),
-                          ),
-                          child: FilledButton(
-                            onPressed: mutation.isLoading ? null : _submit,
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                            ),
-                            child: mutation.isLoading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator.adaptive(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation(
-                                        Colors.white,
-                                      ),
-                                    ),
-                                  )
-                                : const Text('Guardar contraseña'),
-                          ),
-                        ),
-                      ],
-                    ),
+  @override
+  void dispose() {
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = ref.read(updatePasswordControllerProvider);
+    final mutation = ref.watch(updatePasswordMutationProvider);
+
+    final theme = Theme.of(context);
+
+    return PopScope(
+      canPop: !mutation.isLoading,
+
+      child: Scaffold(
+        key: scaffoldKey,
+        backgroundColor: theme.colorScheme.surface,
+
+        body: SafeArea(
+          child: Align(
+            alignment: Alignment.center,
+
+            child: Container(
+              margin: const EdgeInsets.symmetric(
+                vertical: 16.0,
+                horizontal: 24.0,
+              ),
+              padding: const EdgeInsets.all(24.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24.0),
+                color: theme.colorScheme.onPrimary,
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                    blurRadius: 8.0,
+                    spreadRadius: 0.5,
+                    offset: Offset.zero,
                   ),
-                ),
+                ],
+              ),
+
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 4.0,
+
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: theme.colorScheme.primaryContainer.withValues(
+                        alpha: 0.75,
+                      ),
+                    ),
+                    width: 64.0,
+                    height: 64.0,
+
+                    child: Icon(
+                      TablerIcons.shield_lock_filled,
+                      color: theme.colorScheme.primary,
+                      size: 28.0,
+                    ),
+                  ).centered(),
+
+                  Text(
+                    'Actualizar contraseña',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ).padded(const EdgeInsets.only(top: 16.0)),
+                  Text(
+                    'Ingresa tu nueva contraseña y confírmala.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                  ).padded(const EdgeInsets.only(top: 4.0, bottom: 16.0)),
+
+                  form(),
+
+                  FilledButton(
+                    onPressed: !mutation.isLoading
+                        ? () async {
+                            if (!formKey.currentState!.validate()) {
+                              return;
+                            }
+
+                            await controller.mutate(
+                              password: passwordController.text,
+                            );
+                          }
+                        : null,
+
+                    child: const Text('Actualizar'),
+                  ).padded(const EdgeInsets.only(top: 16.0)),
+
+                  TextButton.icon(
+                        onPressed: !mutation.isLoading
+                            ? () async {
+                                final router = ref.read(goRouterProvider);
+
+                                try {
+                                  router.pop();
+                                } catch (e) {
+                                  if (kDebugMode) {
+                                    debugPrint(e.toString());
+                                  }
+
+                                  await router.replace(SignInPage.routePath);
+                                }
+                              }
+                            : null,
+
+                        icon: const Icon(LucideIcons.arrowLeft),
+                        label: const Text('Volver al inicio'),
+                      )
+                      .aligned(Alignment.center)
+                      .padded(const EdgeInsets.only(top: 16.0)),
+                ],
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget form() {
+    return Form(
+      key: formKey,
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 4.0,
+
+        children: [
+          Text(
+            'common.fields.password'.tr(),
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+          ).padded(const EdgeInsets.only(top: 8.0)),
+          PasswordFormField(
+            controller: passwordController,
+            validator: passwordValidator.validate,
+
+            hintText: 'auth.sign_in.password_hint'.tr(),
+          ),
+
+          Text(
+            'Ingresa tu nueva contraseña'.tr(),
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+          ).padded(const EdgeInsets.only(top: 8.0)),
+          PasswordFormField(
+            controller: confirmPasswordController,
+            validator: confirmationValidator(
+              () => passwordController.text,
+            ).validate,
+
+            hintText: 'Confirma tu nueva contraseña'.tr(),
+          ),
+        ],
       ),
     );
   }

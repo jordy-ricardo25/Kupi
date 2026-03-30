@@ -59,7 +59,8 @@ class _PasswordFormFieldState extends ConsumerState<PasswordFormField> {
       validator: widget.validator,
       decoration: InputDecoration(
         filled: true,
-        fillColor: widget.backgroundColor ?? Colors.transparent,
+        fillColor:
+            widget.backgroundColor ?? Colors.grey.withValues(alpha: 0.15),
 
         enabledBorder: inputBorder(),
         focusedBorder: inputBorder(),
@@ -73,7 +74,7 @@ class _PasswordFormFieldState extends ConsumerState<PasswordFormField> {
 
         prefixIcon: Icon(
           LucideIcons.lock,
-          color: Theme.of(context).colorScheme.outline,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
         suffixIcon: InkWell(
           onTap: () {
@@ -90,8 +91,8 @@ class _PasswordFormFieldState extends ConsumerState<PasswordFormField> {
 
   InputBorder inputBorder() {
     return OutlineInputBorder(
-      borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-      borderRadius: BorderRadius.circular(12.0),
+      borderSide: BorderSide.none,
+      borderRadius: BorderRadius.circular(50.0),
     );
   }
 

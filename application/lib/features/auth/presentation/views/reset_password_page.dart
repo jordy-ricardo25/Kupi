@@ -1,9 +1,16 @@
+import 'package:easy_localization/easy_localization.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
+import 'package:kupi/app/index.dart';
+import 'package:kupi/core/extensions/index.dart';
 import 'package:kupi/core/utils/index.dart';
+import 'package:kupi/core/validation/index.dart';
 import 'package:kupi/features/auth/index.dart';
+
+import 'package:lucide_icons/lucide_icons.dart';
 
 final class ResetPasswordPage extends ConsumerStatefulWidget {
   static const routePath = '/reset-password';
@@ -17,65 +24,20 @@ final class ResetPasswordPage extends ConsumerStatefulWidget {
 }
 
 class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
-  static const brandPurple = Color(0xFF813EF4);
-
+  final scaffoldKey = GlobalKey<ScaffoldState>();
   final formKey = GlobalKey<FormState>();
+
   final emailController = TextEditingController();
+
+  final emailValidator = Validator<String>()
+    ..required()
+    ..email();
 
   @override
   void initState() {
     super.initState();
-    emailController.addListener(_normalizeEmailInput);
-  }
 
-  void _normalizeEmailInput() {
-    final raw = emailController.text;
-    final normalized = raw
-        .toLowerCase()
-        .replaceAll(' ', '')
-        .replaceAll(RegExp(r'[^a-z0-9@._+\-]'), '');
-
-    if (raw == normalized) return;
-
-    emailController.value = TextEditingValue(
-      text: normalized,
-      selection: TextSelection.collapsed(offset: normalized.length),
-    );
-  }
-
-  @override
-  void dispose() {
-    emailController.removeListener(_normalizeEmailInput);
-    emailController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final isValid = formKey.currentState?.validate() ?? false;
-    if (!isValid) return;
-
-    await ref
-        .read(resetPasswordControllerProvider)
-        .mutate(email: emailController.text.trim());
-  }
-
-  String? _validateEmail(String? value) {
-    final email = value?.trim() ?? '';
-    if (email.isEmpty) return 'Ingresa tu correo electrónico.';
-
-    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-    if (!emailRegex.hasMatch(email)) {
-      return 'Ingresa un correo válido.';
-    }
-
-    return null;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final mutation = ref.watch(resetPasswordMutationProvider);
-
-    ref.listen(resetPasswordMutationProvider, (previous, next) {
+    ref.listenManual(resetPasswordMutationProvider, (previous, next) {
       if (previous?.hasError == true && next.hasError) return;
 
       if (next.hasError && next.error != null) {
@@ -91,104 +53,150 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
         );
       }
     });
+  }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F2FA),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 410),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE9E5F4)),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Text(
-                          'Recuperar contraseña',
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF1A1A1F),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'Ingresa tu correo y te enviaremos un enlace para restablecerla.',
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(color: const Color(0xFF808090)),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 24),
-                        EmailFormField(
-                          controller: emailController,
-                          validator: _validateEmail,
-                          labelText: 'EMAIL',
-                          hintText: 'nombre@ejemplo.com',
-                          backgroundColor: const Color(0xFFFAFAFD),
-                        ),
-                        const SizedBox(height: 18),
-                        Container(
-                          height: 56,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(999),
-                            gradient: const LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: [Color(0xFF6F31E8), brandPurple],
-                            ),
-                          ),
-                          child: FilledButton(
-                            onPressed: mutation.isLoading ? null : _submit,
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                            ),
-                            child: mutation.isLoading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator.adaptive(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation(
-                                        Colors.white,
-                                      ),
-                                    ),
-                                  )
-                                : const Text('Enviar enlace'),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        TextButton(
-                          onPressed: mutation.isLoading
-                              ? null
-                              : () {
-                                  context.pop();
-                                },
-                          child: const Text('Volver a iniciar sesión'),
-                        ),
-                      ],
-                    ),
+  @override
+  void dispose() {
+    emailController.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = ref.read(resetPasswordControllerProvider);
+    final mutation = ref.watch(resetPasswordMutationProvider);
+
+    final theme = Theme.of(context);
+
+    return PopScope(
+      canPop: !mutation.isLoading,
+
+      child: Scaffold(
+        key: scaffoldKey,
+        backgroundColor: theme.colorScheme.surface,
+
+        body: SafeArea(
+          child: Align(
+            alignment: Alignment.center,
+
+            child: Container(
+              margin: const EdgeInsets.symmetric(
+                vertical: 16.0,
+                horizontal: 24.0,
+              ),
+              padding: const EdgeInsets.all(24.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24.0),
+                color: theme.colorScheme.onPrimary,
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                    blurRadius: 8.0,
+                    spreadRadius: 0.5,
+                    offset: Offset.zero,
                   ),
-                ),
+                ],
+              ),
+
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 4.0,
+
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: theme.colorScheme.primaryContainer.withValues(
+                        alpha: 0.75,
+                      ),
+                    ),
+                    width: 64.0,
+                    height: 64.0,
+
+                    child: Icon(
+                      TablerIcons.lock_filled,
+                      color: theme.colorScheme.primary,
+                      size: 28.0,
+                    ),
+                  ).centered(),
+
+                  Text(
+                    'Restablecer contraseña',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ).padded(const EdgeInsets.only(top: 16.0)),
+                  Text(
+                    'Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                  ).padded(const EdgeInsets.only(top: 4.0, bottom: 16.0)),
+
+                  form(),
+
+                  FilledButton(
+                    onPressed: !mutation.isLoading
+                        ? () async {
+                            if (!formKey.currentState!.validate()) {
+                              return;
+                            }
+
+                            await controller.mutate(
+                              email: emailController.text,
+                            );
+                          }
+                        : null,
+
+                    child: const Text('Restablecer'),
+                  ).padded(const EdgeInsets.only(top: 16.0)),
+
+                  TextButton.icon(
+                        onPressed: !mutation.isLoading
+                            ? () {
+                                ref.read(goRouterProvider).pop();
+                              }
+                            : null,
+
+                        icon: const Icon(LucideIcons.arrowLeft),
+                        label: const Text('Volver al inicio'),
+                      )
+                      .aligned(Alignment.center)
+                      .padded(const EdgeInsets.only(top: 16.0)),
+                ],
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget form() {
+    return Form(
+      key: formKey,
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 4.0,
+
+        children: [
+          Text(
+            'common.fields.email'.tr(),
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+          ).padded(const EdgeInsets.only(top: 8.0)),
+          EmailFormField(
+            controller: emailController,
+            validator: emailValidator.validate,
+
+            hintText: 'auth.sign_in.email_hint'.tr(),
+          ),
+        ],
       ),
     );
   }

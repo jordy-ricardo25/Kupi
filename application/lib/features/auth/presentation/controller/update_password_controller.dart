@@ -1,10 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:kupi/core/exceptions/index.dart';
 import 'package:kupi/features/auth/index.dart';
 
-@immutable
 final class UpdatePasswordController {
   const UpdatePasswordController(this._ref);
 
@@ -24,10 +22,7 @@ final class UpdatePasswordController {
         throw const AuthException('La contraseña no puede estar vacía.');
       }
 
-      await _ref
-          .read(authRepositoryProvider)
-          .updatePassword(password)
-          .then((r) => r.fold((e) => throw AuthException(e), (_) {}));
+      await _ref.read(authRepositoryProvider).updatePassword(password);
 
       notifier.state = notifier.state.copyWith(isLoading: false);
     } catch (e) {

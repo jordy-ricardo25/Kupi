@@ -5,19 +5,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 final class LocalPreferencesNotifier extends PreferencesNotifier {
   static const _kThemeKey = '__theme_mode__';
   static const _kLocaleKey = '__locale_mode__';
-  static const _kNotificationsKey = '__notifications_enabled__';
+  static const _kNotificationsKey = '__allow_notifications__';
 
   final SharedPreferences _prefs;
 
   LocalPreferencesNotifier(this._prefs) : super() {
     final isDarkThemeMode = _prefs.getBool(_kThemeKey);
     final currentLocale = _prefs.getString(_kLocaleKey);
-    final notificationsEnabled = _prefs.getBool(_kNotificationsKey);
+    final allowNotifications = _prefs.getBool(_kNotificationsKey);
 
     state = (state as PreferencesModel).copyWith(
       theme: (isDarkThemeMode ?? false) ? ThemeMode.dark : ThemeMode.light,
       locale: Locale(currentLocale ?? 'es'),
-      allowNotifications: notificationsEnabled ?? false,
+      allowNotifications: allowNotifications ?? false,
     );
   }
 

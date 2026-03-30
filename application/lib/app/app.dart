@@ -1,4 +1,5 @@
 // import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,6 +20,12 @@ class _MainAppState extends ConsumerState<MainApp> {
   void initState() {
     super.initState();
 
+    ref.listenManual(preferencesProvider, (_, next) {
+      if (next.locale.languageCode != context.locale.languageCode) {
+        context.setLocale(next.locale);
+      }
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // QuickActionsService.instance.initialize();
       // DeepLinksService.instance.initialize(ref: ref);
@@ -38,9 +45,9 @@ class _MainAppState extends ConsumerState<MainApp> {
       darkTheme: Theme.of(context).dark,
       themeMode: preferences.theme,
 
-      // localizationsDelegates: context.localizationDelegates,
-      // supportedLocales: context.supportedLocales,
-      locale: preferences.locale,
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
 
       routerConfig: router,
     );

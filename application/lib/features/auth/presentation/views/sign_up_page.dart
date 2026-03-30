@@ -1,8 +1,14 @@
+import 'package:easy_localization/easy_localization.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:go_router/go_router.dart';
 
+import 'package:kupi/core/extensions/index.dart';
 import 'package:kupi/core/utils/index.dart';
+import 'package:kupi/core/validation/index.dart';
+import 'package:kupi/core/widgets/index.dart';
 import 'package:kupi/features/auth/index.dart';
 
 final class SignUpPage extends ConsumerStatefulWidget {
@@ -17,91 +23,33 @@ final class SignUpPage extends ConsumerStatefulWidget {
 }
 
 class _SignUpPageState extends ConsumerState<SignUpPage> {
-  static const brandPurple = Color(0xFF813EF4);
-
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final formKey = GlobalKey<FormState>();
+
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  final nameValidator = Validator<String>()
+    ..required()
+    ..minLength(3);
+  final emailValidator = Validator<String>()
+    ..required()
+    ..email();
+  final passwordValidator = Validator<String>()
+    ..required()
+    ..minLength(8);
+  Validator<String> confirmationValidator(String Function() getPassword) =>
+      Validator<String>()
+        ..required()
+        ..matches(getPassword);
 
   @override
   void initState() {
     super.initState();
-    emailController.addListener(_normalizeEmailInput);
-    passwordController.addListener(_normalizePasswordInput);
-  }
 
-  void _normalizeEmailInput() {
-    final raw = emailController.text;
-    final normalized = AuthValidators.normalizeEmailInput(raw);
-
-    if (raw == normalized) return;
-
-    emailController.value = TextEditingValue(
-      text: normalized,
-      selection: TextSelection.collapsed(offset: normalized.length),
-    );
-  }
-
-  void _normalizePasswordInput() {
-    final raw = passwordController.text;
-    final normalized = AuthValidators.normalizePasswordInput(raw);
-
-    if (raw == normalized) return;
-
-    passwordController.value = TextEditingValue(
-      text: normalized,
-      selection: TextSelection.collapsed(offset: normalized.length),
-    );
-  }
-
-  @override
-  void dispose() {
-    emailController.removeListener(_normalizeEmailInput);
-    passwordController.removeListener(_normalizePasswordInput);
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final isValid = formKey.currentState?.validate() ?? false;
-    if (!isValid) return;
-
-    await ref
-        .read(signUpControllerProvider)
-        .mutate(
-          name: nameController.text,
-          email: emailController.text,
-          password: passwordController.text,
-        );
-  }
-
-  Widget _buildOrb({
-    required double size,
-    required Alignment alignment,
-    required List<Color> colors,
-  }) {
-    return Align(
-      alignment: alignment,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(colors: colors, stops: const [0.0, 1.0]),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final mutation = ref.watch(signUpMutationProvider);
-
-    ref.listen(signUpMutationProvider, (previous, next) {
+    ref.listenManual(signUpMutationProvider, (previous, next) {
       if (previous?.hasError == true && next.hasError) return;
 
       if (next.hasError && next.error != null) {
@@ -122,204 +70,235 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         });
       }
     });
+  }
 
-    return Scaffold(
-      key: scaffoldKey,
-      backgroundColor: const Color(0xFFF7F5FD),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            _buildOrb(
-              size: 280,
-              alignment: const Alignment(-1.15, -1.05),
-              colors: [
-                brandPurple.withValues(alpha: 0.16),
-                brandPurple.withValues(alpha: 0.03),
-              ],
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = ref.read(signUpControllerProvider);
+    final mutation = ref.watch(signUpMutationProvider);
+
+    final theme = Theme.of(context);
+
+    return PopScope(
+      canPop: !mutation.isLoading,
+
+      child: Scaffold(
+        key: scaffoldKey,
+        backgroundColor: theme.colorScheme.surface,
+
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          leading: PopButton(
+            enabled: !mutation.isLoading,
+
+            style: theme.iconButtonTheme.style?.copyWith(
+              backgroundColor: WidgetStateProperty.all(Colors.white),
+              minimumSize: WidgetStateProperty.all(const Size(44.0, 44.0)),
             ),
-            _buildOrb(
-              size: 190,
-              alignment: const Alignment(1.2, -0.95),
-              colors: [brandPurple.withValues(alpha: 0.12), Colors.transparent],
-            ),
-            Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 410),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(color: const Color(0xFFEBE5F7)),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x190F0C1F),
-                          blurRadius: 30,
-                          offset: Offset(0, 14),
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(22, 24, 22, 20),
-                      child: Form(
-                        key: formKey,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const Text(
-                              'kupi',
-                              style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w800,
-                                fontFamily: 'Memsmark!',
-                                letterSpacing: 1.25,
-                                color: Color(0xFF813EF4),
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 18),
-                            const Text(
-                              'Crea tu\ncuenta',
-                              style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.w800,
-                                height: 1.02,
-                                color: Color(0xFF16161D),
-                                letterSpacing: -1.0,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              'Regístrate para empezar con Kupi en segundos.',
-                              style: Theme.of(context).textTheme.bodyLarge
-                                  ?.copyWith(
-                                    color: const Color(0xFF81808D),
-                                    height: 1.24,
-                                  ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 22),
-                            NameFormField(
-                              controller: nameController,
-                              validator: AuthValidators.validateFullName,
-                              labelText: 'NOMBRE COMPLETO',
-                              hintText: 'Ej. Alex Thompson',
-                              backgroundColor: Colors.white,
-                            ),
-                            const SizedBox(height: 12),
-                            EmailFormField(
-                              controller: emailController,
-                              validator: AuthValidators.validateEmail,
-                              labelText: 'CORREO ELECTRÓNICO',
-                              hintText: 'nombre@ejemplo.com',
-                              backgroundColor: Colors.white,
-                            ),
-                            const SizedBox(height: 12),
-                            PasswordFormField(
-                              controller: passwordController,
-                              validator:
-                                  AuthValidators.validateSixDigitsPassword,
-                              labelText: 'CONTRASEÑA',
-                              hintText: '6 dígitos',
-                              backgroundColor: Colors.white,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 6.0, left: 4),
-                              child: Text(
-                                'Usa solo 6 dígitos numéricos.',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: const Color(0xFF8A8A99)),
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-                            Container(
-                              height: 56,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(18),
-                                gradient: const LinearGradient(
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                  colors: [Color(0xFF6F31E8), brandPurple],
-                                ),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Color(0x3D813EF4),
-                                    blurRadius: 18,
-                                    offset: Offset(0, 10),
-                                  ),
-                                ],
-                              ),
-                              child: FilledButton(
-                                onPressed: mutation.isLoading ? null : _submit,
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-                                  shadowColor: Colors.transparent,
-                                  foregroundColor: Colors.white,
-                                  disabledBackgroundColor: Colors.transparent,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
-                                  textStyle: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                child: mutation.isLoading
-                                    ? const SizedBox(
-                                        height: 22,
-                                        width: 22,
-                                        child:
-                                            CircularProgressIndicator.adaptive(
-                                              strokeWidth: 2,
-                                              valueColor:
-                                                  AlwaysStoppedAnimation(
-                                                    Colors.white,
-                                                  ),
-                                            ),
-                                      )
-                                    : const Text('Crear Cuenta'),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  '¿Ya tienes una cuenta? ',
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(
-                                        color: const Color(0xFF777686),
-                                      ),
-                                ),
-                                TextButton(
-                                  onPressed: mutation.isLoading
-                                      ? null
-                                      : () {
-                                          context.pop();
-                                        },
-                                  child: const Text(
-                                    'Iniciar Sesión',
-                                    style: TextStyle(
-                                      color: brandPurple,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+          ),
+        ),
+        body: SafeArea(
+          child: Stack(
+            children: [
+              orb(
+                size: 280,
+                alignment: const Alignment(1.15, 1.05),
+                colors: [
+                  theme.colorScheme.primary.withValues(alpha: 0.16),
+                  theme.colorScheme.primary.withValues(alpha: 0.03),
+                ],
+              ),
+
+              orb(
+                size: 190,
+                alignment: const Alignment(-1.2, -0.95),
+                colors: [
+                  theme.colorScheme.primary.withValues(alpha: 0.16),
+                  Colors.transparent,
+                ],
+              ),
+
+              SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 32.0,
+                  horizontal: 24.0,
+                ),
+
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 4.0,
+
+                  children: [
+                    Text(
+                      'app.name'.tr(),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.headlineLarge?.copyWith(
+                        fontFamily: 'Memsmark!',
+                        letterSpacing: 1.1,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ).padded(const EdgeInsets.only(bottom: 20.0)),
+
+                    Text(
+                      'auth.sign_up.title'.tr(),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ),
+                    Text(
+                      'auth.sign_up.subtitle'.tr(),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.outline,
+                      ),
+                    ).padded(const EdgeInsets.only(top: 4.0, bottom: 16.0)),
+
+                    ...[
+                      form(),
+
+                      Wrap(
+                        children: [
+                          Text('${'auth.sign_up.legal.accept_prefix'.tr()} '),
+                          LinkButton(
+                            uri: Uri.parse(
+                              'https://paralelo.ec/terms-of-service',
+                            ),
+                            child: Text(
+                              'auth.sign_up.legal.terms_of_service'.tr(),
+                            ),
+                          ),
+                          Text(' ${'auth.sign_up.legal.and'.tr()} '),
+                          LinkButton(
+                            uri: Uri.parse(
+                              'https://paralelo.ec/privacy-policy',
+                            ),
+                            child: Text(
+                              'auth.sign_up.legal.privacy_policy'.tr(),
+                            ),
+                          ),
+                        ],
+                      ).padded(const EdgeInsets.only(top: 16.0)),
+                    ],
+
+                    FilledButton(
+                      onPressed: mutation.isLoading
+                          ? null
+                          : () async {
+                              if (!formKey.currentState!.validate()) {
+                                return;
+                              }
+
+                              await controller.mutate(
+                                name: nameController.text,
+                                email: emailController.text,
+                                password: passwordController.text,
+                              );
+                            },
+
+                      child: Text('common.actions.create_account'.tr()),
+                    ).padded(const EdgeInsets.only(top: 16.0)),
+                  ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget orb({
+    required double size,
+    required Alignment alignment,
+    required List<Color> colors,
+  }) {
+    return Align(
+      alignment: alignment,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(colors: colors, stops: const [0.0, 1.0]),
+        ),
+      ),
+    );
+  }
+
+  Widget form() {
+    final theme = Theme.of(context);
+
+    return Form(
+      key: formKey,
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 4.0,
+
+        children: [
+          Text(
+            'common.fields.name'.tr(),
+            style: theme.textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ).padded(const EdgeInsets.only(top: 8.0)),
+          NameFormField(
+            controller: nameController,
+            validator: nameValidator.validate,
+
+            hintText: 'auth.sign_up.name_hint'.tr(),
+          ),
+
+          Text(
+            'common.fields.email'.tr(),
+            style: theme.textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ).padded(const EdgeInsets.only(top: 8.0)),
+          EmailFormField(
+            controller: emailController,
+            validator: emailValidator.validate,
+
+            hintText: 'auth.sign_in.email_hint'.tr(),
+          ),
+
+          Text(
+            'common.fields.password'.tr(),
+            style: theme.textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ).padded(const EdgeInsets.only(top: 8.0)),
+          PasswordFormField(
+            controller: passwordController,
+            validator: passwordValidator.validate,
+
+            hintText: 'auth.sign_up.password_hint'.tr(),
+          ),
+
+          Text(
+            'common.fields.confirm_password'.tr(),
+            style: theme.textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ).padded(const EdgeInsets.only(top: 8.0)),
+          PasswordFormField(
+            controller: confirmPasswordController,
+            validator: confirmationValidator(
+              () => passwordController.text,
+            ).validate,
+
+            hintText: 'auth.sign_up.confirm_password_hint'.tr(),
+          ),
+        ],
       ),
     );
   }

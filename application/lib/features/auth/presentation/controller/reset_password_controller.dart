@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kupi/core/exceptions/index.dart';
 import 'package:kupi/features/auth/index.dart';
 
+import 'package:supabase_flutter/supabase_flutter.dart' show AuthApiException;
+
 final class ResetPasswordController {
   const ResetPasswordController(this._ref);
 
@@ -22,21 +24,21 @@ final class ResetPasswordController {
         throw AuthException('Ingresa un correo electrónico válido.');
       }
 
-      await _ref
-          .read(authRepositoryProvider)
-          .recoverPassword(email)
-          .then((r) => r.fold((e) => throw AuthException(e), (_) {}));
+      await _ref.read(authRepositoryProvider).recoverPassword(email);
 
       notifier.state = notifier.state.copyWith(isLoading: false);
     } catch (e) {
       notifier.state = notifier.state.copyWith(
         isLoading: false,
         hasError: true,
-        error: e is AppException
-            ? e.message
-            : 'Ocurrió un error inesperado.'
-                  '\n'
-                  'Inténtalo de nuevo más tarde.',
+        error: switch (e) {
+          AuthApiException ex => ex.message,
+          AppException ex => ex.message,
+          _ =>
+            'Ocurrió un error al enviar el correo de recuperación.'
+                '\n'
+                'Inténtalo de nuevo más tarde.',
+        },
       );
     }
   }

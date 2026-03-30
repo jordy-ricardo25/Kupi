@@ -57,7 +57,7 @@ extension AppThemeData on ThemeData {
             const Size(double.minPositive, 44),
           ),
           shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
           ),
         ),
       ),
@@ -68,7 +68,7 @@ extension AppThemeData on ThemeData {
             const Size(double.minPositive, 44),
           ),
           shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
           ),
         ),
       ),
@@ -86,12 +86,12 @@ extension AppThemeData on ThemeData {
             ),
           ),
           shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
           ),
         ),
       ),
 
-      iconButtonTheme: IconButtonThemeData(style: ButtonStyle()),
+      iconButtonTheme: IconButtonThemeData(style: const ButtonStyle()),
 
       textButtonTheme: TextButtonThemeData(
         style: ButtonStyle(
@@ -141,6 +141,7 @@ extension AppThemeData on ThemeData {
       ),
 
       appBarTheme: AppBarThemeData(
+        leadingWidth: 64.0,
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         systemOverlayStyle: brightness == Brightness.dark

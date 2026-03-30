@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class Env {
+final class Env {
   static bool get _useDartDefine => kIsWeb && kReleaseMode;
 
   static String get supabaseUrl {

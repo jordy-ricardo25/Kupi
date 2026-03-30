@@ -1,5 +1,4 @@
 import 'package:kupi/core/exceptions/index.dart';
-import 'package:kupi/core/utils/index.dart';
 import 'package:kupi/features/auth/index.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart'
@@ -14,34 +13,25 @@ final class SupabaseAuthRepository implements AuthRepository {
   const SupabaseAuthRepository(this._client);
 
   @override
-  Future<Result<AuthUser>> signInWithEmail({
+  Future<AuthUser> signInWithEmail({
     required String email,
     required String password,
   }) async {
-    try {
-      final res = await _client.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
+    final res = await _client.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
 
-      final user = _mapUser(res.user);
-      if (user == null) {
-        throw AuthException('Usuario no encontrado');
-      }
-
-      return Result.success(user);
-    } catch (e) {
-      return Result.failure(
-        _extractError(
-          e,
-          fallback: 'El correo o la contraseña no son correctos.',
-        ),
-      );
+    final user = _mapUser(res.user);
+    if (user == null) {
+      throw const AuthException('Usuario no encontrado.');
     }
+
+    return user;
   }
 
   @override
-  Future<Result<bool>> signInWithGoogle() {
+  Future<bool> signInWithGoogle() {
     return _signInWithOAuth(
       provider: OAuthProvider.google,
       fallbackError: 'No se pudo iniciar sesión con Google.',
@@ -49,7 +39,7 @@ final class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<Result<bool>> signInWithApple() {
+  Future<bool> signInWithApple() {
     return _signInWithOAuth(
       provider: OAuthProvider.apple,
       fallbackError: 'No se pudo iniciar sesión con Apple.',
@@ -57,7 +47,7 @@ final class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<Result<AuthUser>> signUp({
+  Future<AuthUser> signUp({
     required String email,
     required String password,
   }) async {
@@ -70,56 +60,65 @@ final class SupabaseAuthRepository implements AuthRepository {
 
       final user = _mapUser(res.user ?? _client.auth.currentUser);
       if (user == null) {
-        throw AuthException(
-          'No se pudo recuperar la sesión después del registro. Revisa tu correo de confirmación e intenta iniciar sesión.',
-        );
+        throw const AuthException('No se pudo crear el usuario.');
       }
 
-      return Result.success(user);
+      return user;
     } catch (e) {
-      return Result.failure(
-        _extractError(e, fallback: 'No se pudo completar el registro.'),
+      return Future.error(
+        e is AppException
+            ? e.message
+            : 'Ocurrió un error al registrar tu cuenta.'
+                  '\n'
+                  'Inténtalo de nuevo más tarde.',
       );
     }
   }
 
   @override
-  Future<Result<void>> recoverPassword(String email) async {
+  Future<void> recoverPassword(String email) async {
     try {
       await _client.auth.resetPasswordForEmail(
         email,
         redirectTo: _updatePasswordRedirect,
       );
-      return Result.success(null);
     } catch (e) {
-      return Result.failure(
-        _extractError(
-          e,
-          fallback: 'No se pudo enviar el correo de recuperación.',
-        ),
+      return Future.error(
+        e is AppException
+            ? e.message
+            : 'Ocurrió un error al enviar el correo de recuperación.'
+                  '\n'
+                  'Inténtalo de nuevo más tarde.',
       );
     }
   }
 
   @override
-  Future<Result<void>> updatePassword(String password) async {
+  Future<void> updatePassword(String password) async {
     try {
       await _client.auth.updateUser(UserAttributes(password: password));
-      return Result.success(null);
     } catch (e) {
-      return Result.failure(
-        _extractError(e, fallback: 'No se pudo actualizar la contraseña.'),
+      return Future.error(
+        e is AppException
+            ? e.message
+            : 'Ocurrió un error al actualizar la contraseña.'
+                  '\n'
+                  'Inténtalo de nuevo más tarde.',
       );
     }
   }
 
   @override
-  Future<Result<void>> signOut() async {
+  Future<void> signOut() async {
     try {
       await _client.auth.signOut();
-      return Result.success(null);
+      return;
     } catch (_) {
-      return Result.failure('No se pudo cerrar sesión.');
+      return Future.error(
+        'No se pudo cerrar sesión.'
+        '\n'
+        'Inténtalo de nuevo más tarde.',
+      );
     }
   }
 
@@ -134,7 +133,7 @@ final class SupabaseAuthRepository implements AuthRepository {
     return AuthUserModel(user.id, email: user.email!);
   }
 
-  Future<Result<bool>> _signInWithOAuth({
+  Future<bool> _signInWithOAuth({
     required OAuthProvider provider,
     required String fallbackError,
   }) async {
@@ -144,18 +143,15 @@ final class SupabaseAuthRepository implements AuthRepository {
         redirectTo: _signInRedirect,
       );
 
-      return Result.success(opened);
+      return opened;
     } catch (e) {
-      return Result.failure(_extractError(e, fallback: fallbackError));
+      return Future.error(
+        e is AppException
+            ? e.message
+            : 'Ocurrió un error al iniciar con ${provider == OAuthProvider.google ? 'Google' : 'Apple'}'
+                  '\n'
+                  'Inténtalo de nuevo más tarde.',
+      );
     }
-  }
-
-  String _extractError(Object error, {required String fallback}) {
-    if (error is AppException) return error.message;
-
-    final message = error.toString().replaceFirst('Exception: ', '').trim();
-    if (message.isEmpty) return fallback;
-
-    return message;
   }
 }

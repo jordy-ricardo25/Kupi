@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import 'package:kupi/core/utils/results.dart';
+import 'package:kupi/core/utils/index.dart';
 import 'package:kupi/features/user/index.dart';
 
 /// Repository contract for user preference operations.

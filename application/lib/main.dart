@@ -1,3 +1,5 @@
+import 'package:easy_localization/easy_localization.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -6,12 +8,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kupi/app/app.dart';
 import 'package:kupi/app/index.dart';
 import 'package:kupi/core/utils/index.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -34,13 +37,19 @@ void main() async {
   final preferences = await SharedPreferences.getInstance();
 
   runApp(
-    ProviderScope(
-      overrides: [
-        preferencesProvider.overrideWith(
-          (_) => LocalPreferencesNotifier(preferences),
-        ),
-      ],
-      child: const MainApp(),
+    EasyLocalization(
+      supportedLocales: const [Locale('es'), Locale('en')],
+      fallbackLocale: const Locale('en'),
+      path: 'assets/l10n',
+
+      child: ProviderScope(
+        overrides: [
+          preferencesProvider.overrideWith(
+            (_) => LocalPreferencesNotifier(preferences),
+          ),
+        ],
+        child: const MainApp(),
+      ),
     ),
   );
 }
