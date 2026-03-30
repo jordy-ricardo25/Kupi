@@ -1,13 +1,11 @@
 import 'package:kupi/core/exceptions/index.dart';
+import 'package:kupi/core/utils/index.dart';
 import 'package:kupi/features/auth/index.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart'
     hide AuthUser, AuthException;
 
 final class SupabaseAuthRepository implements AuthRepository {
-  static const _signInRedirect = 'kupi://auth/signin';
-  static const _updatePasswordRedirect = 'kupi://auth/update-password';
-
   final SupabaseClient _client;
 
   const SupabaseAuthRepository(this._client);
@@ -55,7 +53,7 @@ final class SupabaseAuthRepository implements AuthRepository {
       final res = await _client.auth.signUp(
         email: email,
         password: password,
-        emailRedirectTo: _signInRedirect,
+        emailRedirectTo: Env.callbackScheme,
       );
 
       final user = _mapUser(res.user ?? _client.auth.currentUser);
@@ -80,7 +78,7 @@ final class SupabaseAuthRepository implements AuthRepository {
     try {
       await _client.auth.resetPasswordForEmail(
         email,
-        redirectTo: _updatePasswordRedirect,
+        redirectTo: Env.callbackScheme,
       );
     } catch (e) {
       return Future.error(
@@ -140,7 +138,7 @@ final class SupabaseAuthRepository implements AuthRepository {
     try {
       final opened = await _client.auth.signInWithOAuth(
         provider,
-        redirectTo: _signInRedirect,
+        redirectTo: Env.callbackScheme,
         authScreenLaunchMode: LaunchMode.inAppWebView,
         queryParams: provider == OAuthProvider.google
             ? {'prompt': 'select_account consent'}

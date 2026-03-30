@@ -17,4 +17,11 @@ final class Env {
     }
     return dotenv.env['SUPABASE_ANON_KEY']!;
   }
+
+  static String get callbackScheme {
+    if (_useDartDefine) {
+      return const String.fromEnvironment('CALLBACK_SCHEME');
+    }
+    return dotenv.env['CALLBACK_SCHEME']!;
+  }
 }
