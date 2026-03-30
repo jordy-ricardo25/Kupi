@@ -32,8 +32,13 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="kupi"
-                    android:host="auth" />
+                    android:scheme="https"
+                    android:host="kupi.msbx.dev"
+                    android:pathPrefix="/" />
+                <data
+                    android:scheme="https"
+                    android:host="www.kupi.msbx.dev"
+                    android:pathPrefix="/" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

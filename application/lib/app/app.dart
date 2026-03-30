@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:kupi/app/index.dart';
+import 'package:kupi/core/services/index.dart';
 import 'package:kupi/core/theme/index.dart';
 
 final class MainApp extends ConsumerStatefulWidget {
@@ -28,7 +29,7 @@ class _MainAppState extends ConsumerState<MainApp> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // QuickActionsService.instance.initialize();
-      // DeepLinksService.instance.initialize(ref: ref);
+      DeepLinksService.instance.initialize(ref: ref);
     });
   }
 
